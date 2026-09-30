@@ -168,8 +168,14 @@ class MainActivity : Activity() {
         }
     }
 
+    override fun onDestroy() {
+        GateState.scrGateOpen = false
+        super.onDestroy()
+    }
+
     override fun onStop() {
         super.onStop()
+        GateState.scrGateOpen = false
         // Şifre girilmeden ekrandan çıkıldıysa (Ana ekran / son uygulamalar) bu şifre
         // ekranını tamamen kapat; yoksa arkada kalıp kilitli uygulamayı geri çağırıyor.
         if (isPromptMode() && !isFinishing) finishAndRemoveTask()
@@ -552,6 +558,7 @@ class MainActivity : Activity() {
     // Ekran süresi kilidi (tüm telefon) sırasında: şifre iste, doğruysa bu kilit döngüsü için
     // tek seferlik ek süre ver. Süre bitince LimiterService kalan kilit süresi için kartı geri getirir.
     private fun showScreenExtraGate() {
+        GateState.scrGateOpen = true
         val remainingTitle = TextView(this).apply {
             text = "Kalan süre:"
             textSize = 15f

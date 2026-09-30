@@ -19,3 +19,12 @@ object UnlockState {
         unlockedPkgs.remove(pkg)
     }
 }
+
+/**
+ * Ekran süresi kilidinde şifre ekranı (MainActivity) açıkken true olur. Klavye / otomatik
+ * doldurma gibi başka paketlerin pencere olayları geri sayım kartını şifre ekranının
+ * üstüne geri getirmesin diye LimiterService bu bayrağa bakar.
+ */
+object GateState {
+    @Volatile var scrGateOpen = false
+}

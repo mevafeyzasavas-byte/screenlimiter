@@ -388,7 +388,8 @@ class LimiterService : AccessibilityService() {
         val now = System.currentTimeMillis()
         if (now < scrLockUntil()) {
             val p = fgPkg
-            val allowed = now < scrExtraUntil() || (p != null && p in scrAllowedPkgs())
+            val allowed = now < scrExtraUntil() || GateState.scrGateOpen ||
+                (p != null && p in scrAllowedPkgs())
             if (allowed) hideScreenLock()
             else if (SystemClock.elapsedRealtime() >= scrSuppressUntil && isInteractive()) showScreenLock()
             scheduleScrCheck()
