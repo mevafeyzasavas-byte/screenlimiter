@@ -85,14 +85,6 @@ class MainActivity : Activity() {
         prefs = getSharedPreferences("limiter", Context.MODE_PRIVATE)
         selected.addAll(prefs.getStringSet("selected", emptySet()) ?: emptySet())
 
-        val pm = packageManager
-        val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        val apps = pm.queryIntentActivities(launcherIntent, 0)
-            .map { AppItem(it.loadLabel(pm).toString(), it.activityInfo.packageName, it.loadIcon(pm)) }
-            .filter { it.pkg != packageName }
-            .distinctBy { it.pkg }
-            .sortedBy { it.label.lowercase() }
-
         header = TextView(this).apply {
             textSize = 18f
             setPadding(32, 64, 32, 8)
@@ -132,33 +124,13 @@ class MainActivity : Activity() {
 
         screenBtn = Button(this).apply { setOnClickListener { showScreenLimitDialog() } }
 
-        val list = ListView(this)
-        val adapter = AppAdapter(apps)
-        list.adapter = adapter
-        list.setOnItemClickListener { _, _, pos, _ ->
-            val app = apps[pos]
-            if (app.pkg in selected) {
-                // zaten seçili: süreleri düzenle ya da kaldır
-                showLimitDialog(app.pkg, app.label, isNew = false, adapter)
-            } else {
-                // yeni seçim: varsayılan sürelerle ekle, hemen düzenlemeye izin ver
-                selected.add(app.pkg)
-                prefs.edit().putStringSet("selected", HashSet(selected)).apply()
-                adapter.notifyDataSetChanged()
-                updateHeader()
-                showLimitDialog(app.pkg, app.label, isNew = true, adapter)
-            }
-        }
-
         mainView = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             addView(header)
             addView(status)
+            addView(screenBtn)
             addView(btn)
             addView(adminBtn)
-            addView(screenBtn)
-            addView(list, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         }
     }
 
@@ -756,7 +728,7 @@ class MainActivity : Activity() {
     }
 
     private fun updateHeader() {
-        header.text = "Sınırlanacak uygulamalar (${selected.size} seçili)"
+        header.text = "Ekran süresi limiti"
     }
 
     // dakika değeri, gösterim etiketi
