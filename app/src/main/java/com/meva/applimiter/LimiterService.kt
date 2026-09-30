@@ -457,20 +457,22 @@ class LimiterService : AccessibilityService() {
         fun pill(text: String, onClick: () -> Unit) = TextView(this).apply {
             this.text = text
             textSize = 15f
-            setTextColor(0xFFFFFFFF.toInt())
+            setTextColor(0xFF0F172A.toInt())
             gravity = Gravity.CENTER
             setTypeface(typeface, Typeface.BOLD)
             setPadding(dp(8), dp(14), dp(8), dp(14))
             background = GradientDrawable().apply {
                 cornerRadius = dp(24).toFloat()
-                setColor(0xFF374151.toInt())
+                setColor(0xFFFFFFFF.toInt())
+                setStroke(dp(1), 0xFFEDF1F6.toInt())
             }
+            elevation = dp(6).toFloat()
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                 .apply { marginStart = dp(4); marginEnd = dp(4) }
             setOnClickListener { onClick() }
         }
 
-        val countdown = label(clock(scrLockUntil() - System.currentTimeMillis()), 56f, 0xFF4FD1C5.toInt(), true, 12)
+        val countdown = label(clock(scrLockUntil() - System.currentTimeMillis()), 56f, 0xFF0F9C93.toInt(), true, 12)
         countdown.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
 
         val row = LinearLayout(this).apply {
@@ -504,14 +506,17 @@ class LimiterService : AccessibilityService() {
             setPadding(dp(24), dp(24), dp(24), dp(24))
             addView(GifView(this@LimiterService).apply { setGifResource(R.raw.lock_gif) },
                 LinearLayout.LayoutParams(dp(180), dp(180)).apply { gravity = Gravity.CENTER_HORIZONTAL })
-            addView(label("Ekran süresi doldu", 22f, 0xFFFFFFFF.toInt(), true, 8))
+            addView(label("Ekran süresi doldu", 22f, 0xFF0F172A.toInt(), true, 8))
             addView(countdown)
-            addView(label("Kilidin açılmasına kalan süre", 14f, 0xFF9CA3AF.toInt(), false, 4))
+            addView(label("Kilidin açılmasına kalan süre", 14f, 0xFF64748B.toInt(), false, 4))
             addView(row)
         }
 
         val root = FrameLayout(this).apply {
-            setBackgroundColor(0xFF111827.toInt())
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(0xFFF3F6FA.toInt(), 0xFFFFFFFF.toInt())
+            )
             isClickable = true   // dokunuşlar alttaki uygulamaya geçmesin
             addView(content, FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER))
@@ -586,7 +591,7 @@ class LimiterService : AccessibilityService() {
             pkg
         }
 
-        val countdown = label(clock(lockUntil - System.currentTimeMillis()), 56f, 0xFF4FD1C5.toInt(), true, 12)
+        val countdown = label(clock(lockUntil - System.currentTimeMillis()), 56f, 0xFF0F9C93.toInt(), true, 12)
         countdown.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
 
         val card = LinearLayout(this).apply {
@@ -595,15 +600,17 @@ class LimiterService : AccessibilityService() {
             setPadding(dp(24), dp(32), dp(24), dp(28))
             background = GradientDrawable().apply {
                 cornerRadius = dp(28).toFloat()
-                setColor(0xFF1F2937.toInt())
+                setColor(0xFFFFFFFF.toInt())
+                setStroke(dp(1), 0xFFEDF1F6.toInt())
             }
+            elevation = dp(10).toFloat()
             addView(GifView(this@LimiterService).apply { setGifResource(R.raw.lock_gif) },
                 LinearLayout.LayoutParams(dp(180), dp(180)).apply { gravity = Gravity.CENTER_HORIZONTAL })
-            addView(label(appName, 15f, 0xFF9CA3AF.toInt(), false, 8))
-            addView(label(title, 22f, 0xFFFFFFFF.toInt(), true, 4))
+            addView(label(appName, 15f, 0xFF64748B.toInt(), false, 8))
+            addView(label(title, 22f, 0xFF0F172A.toInt(), true, 4))
             addView(countdown)
-            addView(label(subtitle, 14f, 0xFF9CA3AF.toInt(), false, 4))
-            addView(label("Kapatmak için dokun", 12f, 0xFF6B7280.toInt(), false, 24))
+            addView(label(subtitle, 14f, 0xFF64748B.toInt(), false, 4))
+            addView(label("Kapatmak için dokun", 12f, 0xFF94A3B8.toInt(), false, 24))
         }
 
         val root = FrameLayout(this).apply {
