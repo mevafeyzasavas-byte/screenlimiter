@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "AppLimiter"
+rootProject.name = "ScreenLimiter"
 include(":app")

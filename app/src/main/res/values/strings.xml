@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="accessibility_desc">Seçilen uygulamaların ekranda kalma süresini ölçer ve süre dolunca ana ekrana atıp bir süre kilitler.</string>
-    <string name="admin_desc">App Limiter silme koruması: etkin olduğu sürece uygulama kaldırılamaz.</string>
-    <string name="admin_warn">Koruma kapatılırsa App Limiter kaldırılabilir.</string>
+    <string name="admin_desc">Screen Limiter silme koruması: etkin olduğu sürece uygulama kaldırılamaz.</string>
+    <string name="admin_warn">Koruma kapatılırsa Screen Limiter kaldırılabilir.</string>
 </resources>

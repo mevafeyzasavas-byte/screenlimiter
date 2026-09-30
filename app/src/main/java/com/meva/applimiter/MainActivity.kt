@@ -124,7 +124,7 @@ class MainActivity : Activity() {
                     )
                     .putExtra(
                         DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                        "Açıkken App Limiter doğrudan silinemez."
+                        "Açıkken Screen Limiter doğrudan silinemez."
                     )
                 startActivity(i)
             }
@@ -434,7 +434,7 @@ class MainActivity : Activity() {
 
     private fun showGate() {
         val root = buildPasswordScreen(
-            headline = "App Limiter",
+            headline = "Screen Limiter",
             subtitle = if (guardMode) "Korumalı bir işlem için şifre gerekli"
                        else "Devam etmek için şifreni gir",
             note = if (guardMode)

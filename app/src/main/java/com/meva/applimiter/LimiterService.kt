@@ -721,7 +721,7 @@ class LimiterService : AccessibilityService() {
     }
 
     companion object {
-        private const val LABEL = "app limiter"
+        private const val LABEL = "screen limiter"
 
         // Bu paket adı parçalarını içeren ekranlar taranır (marka farklarını kapsamak için geniş tutuldu)
         private val SENSITIVE_HINTS = listOf(

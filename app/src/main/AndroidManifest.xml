@@ -19,7 +19,7 @@
     <application
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
-        android:label="App Limiter"
+        android:label="Screen Limiter"
         android:theme="@android:style/Theme.Material.Light">
 
         <activity
@@ -35,7 +35,7 @@
         <service
             android:name=".LimiterService"
             android:exported="false"
-            android:label="App Limiter"
+            android:label="Screen Limiter"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -48,7 +48,7 @@
         <receiver
             android:name=".AdminReceiver"
             android:exported="true"
-            android:label="App Limiter"
+            android:label="Screen Limiter"
             android:description="@string/admin_desc"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data
