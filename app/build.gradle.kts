@@ -8,7 +8,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.meva.applimiter"
+        applicationId = "com.meva.screenlimiter"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
