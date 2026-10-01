@@ -1132,7 +1132,7 @@ class LimiterService : AccessibilityService() {
 
         val texts = ArrayList<String>()
         collectTexts(root, texts, 0)
-        if (!isProtectedScreen(texts)) return
+        if (!isProtectedScreen(pkg, texts)) return
 
         lastGuardTrigger = SystemClock.elapsedRealtime()
         performGlobalAction(GLOBAL_ACTION_HOME)
@@ -1151,8 +1151,14 @@ class LimiterService : AccessibilityService() {
         for (i in 0 until node.childCount) collectTexts(node.getChild(i), out, depth + 1)
     }
 
-    private fun isProtectedScreen(texts: List<String>): Boolean {
+    // Koruma YALNIZCA Screen Limiter'ın kendisini silme/kapatma/durdurma ekranlarında çalışır.
+    // Başka uygulamaların kaldırma / bilgi / ayar ekranlarına müdahale etmez.
+    private fun isDanger(t: String): Boolean =
+        t in DANGER_BUTTONS || DANGER_CONTAINS.any { t.contains(it) }
+
+    private fun isProtectedScreen(pkg: String, texts: List<String>): Boolean {
         // 1) Dilden bağımsız işaretler: servis sayfası ve cihaz yöneticisi sayfası açıklamaları
+        //    (bunlar zaten sadece Screen Limiter'a ait metinler)
         val markers = listOf(
             norm(getString(R.string.accessibility_desc)).take(30),
             norm(getString(R.string.admin_desc)).take(30),
@@ -1160,9 +1166,22 @@ class LimiterService : AccessibilityService() {
         )
         if (markers.any { m -> texts.any { it.contains(m) } }) return true
 
-        // 2) Uygulama adı + tehlikeli işlem (kaldır / zorla durdur / devre dışı bırak ...)
-        if (texts.none { it.contains(LABEL) }) return false
-        return texts.any { t -> t in DANGER_EXACT || DANGER_CONTAINS.any { t.contains(it) } }
+        // 2) Ana ekran: ikon etiketi hep ekranda olduğundan "etiket + tehlikeli kelime" aynı ekranda
+        //    yetmez (başka uygulamanın "Kaldır" menüsünü de yakalardı). Sadece AYNI metin parçası
+        //    hem bizim adımızı hem tehlikeli kelimeyi içeriyorsa (ör. "Screen Limiter kaldırılsın mı?").
+        if (isLauncher(pkg)) {
+            return texts.any { it.contains(LABEL) && isDanger(it) }
+        }
+
+        // 3) Paket yükleyici onay penceresi: ekranda tek uygulama var, serbest eşleşme güvenli.
+        if (pkg.contains("packageinstaller")) {
+            return texts.any { it.contains(LABEL) } && texts.any { isDanger(it) }
+        }
+
+        // 4) Ayarlar / uygulama bilgisi: başlıkta TAM olarak bizim adımız olmalı (başka uygulamanın
+        //    sayfasında ya da uygulama listesinde değil) ve ekranda tehlikeli bir DÜĞME olmalı.
+        if (texts.none { it == LABEL }) return false
+        return texts.any { it in DANGER_BUTTONS }
     }
 
     private fun toast(msg: String) {
@@ -1184,6 +1203,11 @@ class LimiterService : AccessibilityService() {
         )
         private val DANGER_EXACT = setOf("sil", "delete", "remove", "kapat", "disable", "turn off")
             .map { norm(it) }.toSet()
+        // Ayarlar > uygulama bilgisi sayfasındaki düğme metinleri (tam eşleşme)
+        private val DANGER_BUTTONS = (DANGER_EXACT + listOf(
+            "kaldır", "uninstall", "zorla durdur", "durmaya zorla", "force stop",
+            "devre dışı bırak", "deactivate", "etkisizleştir"
+        ).map { norm(it) }).toSet()
         private val DANGER_CONTAINS = listOf(
             "kaldır", "uninstall", "zorla durdur", "durmaya zorla", "force stop",
             "devre dışı", "deactivate", "etkisizleştir"
