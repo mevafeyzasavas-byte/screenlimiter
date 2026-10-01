@@ -162,7 +162,10 @@ class QuizPane(context: Context) : LinearLayout(context) {
             addView(primaryButton(if (last) "Sonucu gör" else "Sonraki soru  →") {
                 s.index++
                 s.chosen = -1
-                if (s.index >= s.questions.size) s.finished = true
+                if (s.index >= s.questions.size) {
+                    s.finished = true
+                    QuizLog.add(context, s)   // tarih/kişi/doğru-yanlış kaydı
+                }
                 render(true)
             }, lp(14))
         }

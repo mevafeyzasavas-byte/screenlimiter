@@ -129,6 +129,9 @@ class MainActivity : Activity() {
             addView(header)
             addView(status)
             addView(screenBtn)
+            addView(StatsUi.button(this@MainActivity) { showQuizStats() }, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(32, 16, 32, 16) })
             addView(btn)
             addView(adminBtn)
         }
@@ -336,7 +339,7 @@ class MainActivity : Activity() {
                 intArrayOf(0xFFF3F6FA.toInt(), 0xFFFFFFFF.toInt())
             )
             // büyük GIF'li ekranda içerik sığmayabilir: kaydırılabilir yap, üst boşluğu azalt
-            content.setPadding(dp(28), dp(if (extraView != null) 24 else 96), dp(28), dp(32))
+            content.setPadding(dp(28), dp(if (extraView != null) 24 else 96), dp(28), dp(104))
             addView(ScrollView(this@MainActivity).apply {
                 isVerticalScrollBarEnabled = false
                 addView(content, FrameLayout.LayoutParams(
@@ -407,6 +410,14 @@ class MainActivity : Activity() {
         input.setOnEditorActionListener { _, _, _ -> check(); true }
         button.setOnClickListener { check() }
 
+        // şifresiz: tüm şifre ekranlarının altında soru istatistikleri
+        root.addView(
+            StatsUi.button(this) { showQuizStats() },
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM
+            ).apply { setMargins(dp(28), 0, dp(28), dp(20)) }
+        )
         return root
     }
 
@@ -630,6 +641,16 @@ class MainActivity : Activity() {
             finish()
         }
         setContentView(root)
+    }
+
+    // Soru istatistikleri: ortak panel (StatsUi) bir pencere içinde
+    private fun showQuizStats() {
+        lateinit var dlg: AlertDialog
+        val pane = StatsUi.pane(this, "Kapat") { dlg.dismiss() }
+        dlg = AlertDialog.Builder(this)
+            .setView(ScrollView(this).apply { setPadding(32, 24, 32, 8); addView(pane) })
+            .create()
+        dlg.show()
     }
 
     private fun updateScreenBtn() {

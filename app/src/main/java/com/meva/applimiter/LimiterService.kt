@@ -708,6 +708,7 @@ class LimiterService : AccessibilityService() {
         // ---- Beyza / Feyza soru çözme (şifre kartının üstünde) ----
         scrQuiz?.let { if (it.cycle != scrLockUntil()) scrQuiz = null }   // eski kilit döngüsünden kalan deneme
         val quizPane = QuizPane(this).apply { visibility = View.GONE }
+        val statsHolder = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
         val personBox = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
@@ -733,6 +734,9 @@ class LimiterService : AccessibilityService() {
             }
             addView(hint)
             addView(quizPane, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(16) })
+            addView(statsHolder, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply { topMargin = dp(16) })
         }
@@ -779,18 +783,20 @@ class LimiterService : AccessibilityService() {
 
         // ---- görünüm modları: normal / klavye açık (kompakt) / soru çözme ----
         var compact = false
+        var statsOn = false
         var countdownSize = 56f
         fun applyMode() {
             TransitionManager.beginDelayedTransition(root)
             val quizOn = scrQuiz != null
-            val hero = !compact && !quizOn
+            val hero = !compact && !quizOn && !statsOn
             val heroV = if (hero) View.VISIBLE else View.GONE
             gifView.visibility = heroV
             title.visibility = heroV
             hint.visibility = heroV
             personBox.visibility = heroV
-            card.visibility = if (quizOn) View.GONE else View.VISIBLE
+            card.visibility = if (quizOn || statsOn) View.GONE else View.VISIBLE
             quizPane.visibility = if (quizOn) View.VISIBLE else View.GONE
+            statsHolder.visibility = if (statsOn) View.VISIBLE else View.GONE
             bottomBar.visibility = if (compact) View.GONE else View.VISIBLE   // acil/SMS soru çözerken de açık
             val size = if (hero) 56f else 36f
             if (size != countdownSize) {
@@ -798,7 +804,7 @@ class LimiterService : AccessibilityService() {
                 countdown.textSize = size
             }
             // şifre alanı + buton klavye açıkken de görünür kalsın
-            if (compact && !quizOn) scroll.post { scroll.smoothScrollTo(0, content.height) }
+            if (compact && !quizOn && !statsOn) scroll.post { scroll.smoothScrollTo(0, content.height) }
         }
 
         fun startQuiz(p: Person) {
@@ -806,6 +812,14 @@ class LimiterService : AccessibilityService() {
             scrQuiz = s
             quizPane.bind(s)
             applyMode()
+        }
+
+        fun showStats() {
+            statsHolder.removeAllViews()
+            statsHolder.addView(StatsUi.pane(this, "Geri") { statsOn = false; applyMode() })
+            statsOn = true
+            applyMode()
+            scroll.post { scroll.scrollTo(0, 0) }
         }
 
         fun personBtn(p: Person) = TextView(this).apply {
@@ -827,8 +841,11 @@ class LimiterService : AccessibilityService() {
 
         fun refreshPersonBox() {
             personBox.removeAllViews()
+            personBox.addView(StatsUi.button(this) { showStats() }, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(20) })
             if (prefs.getBoolean("scr_quiz_used", false)) {
-                personBox.addView(label("Bu kilit döngüsünde soru hakkı kullanıldı", 12f, 0xFF94A3B8.toInt(), false, 20))
+                personBox.addView(label("Bu kilit döngüsünde soru hakkı kullanıldı", 12f, 0xFF94A3B8.toInt(), false, 14))
                 return
             }
             personBox.addView(label(
