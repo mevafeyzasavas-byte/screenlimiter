@@ -87,7 +87,7 @@ class MainActivity : Activity() {
 
         header = TextView(this).apply {
             textSize = 18f
-            setPadding(32, 64, 32, 8)
+            setPadding(32, 32, 32, 8)
         }
         updateHeader()
 
@@ -126,12 +126,12 @@ class MainActivity : Activity() {
 
         mainView = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+            addView(StatsUi.button(this@MainActivity) { showQuizStats() }, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(32, 24, 32, 0) })
             addView(header)
             addView(status)
             addView(screenBtn)
-            addView(StatsUi.button(this@MainActivity) { showQuizStats() }, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply { setMargins(32, 16, 32, 16) })
             addView(btn)
             addView(adminBtn)
         }
@@ -339,7 +339,7 @@ class MainActivity : Activity() {
                 intArrayOf(0xFFF3F6FA.toInt(), 0xFFFFFFFF.toInt())
             )
             // büyük GIF'li ekranda içerik sığmayabilir: kaydırılabilir yap, üst boşluğu azalt
-            content.setPadding(dp(28), dp(if (extraView != null) 24 else 96), dp(28), dp(104))
+            content.setPadding(dp(28), dp(96), dp(28), dp(32))
             addView(ScrollView(this@MainActivity).apply {
                 isVerticalScrollBarEnabled = false
                 addView(content, FrameLayout.LayoutParams(
@@ -410,13 +410,13 @@ class MainActivity : Activity() {
         input.setOnEditorActionListener { _, _, _ -> check(); true }
         button.setOnClickListener { check() }
 
-        // şifresiz: tüm şifre ekranlarının altında soru istatistikleri
+        // şifresiz: tüm şifre ekranlarının en üstünde soru istatistikleri
         root.addView(
             StatsUi.button(this) { showQuizStats() },
             FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
-                Gravity.BOTTOM
-            ).apply { setMargins(dp(28), 0, dp(28), dp(20)) }
+                Gravity.TOP
+            ).apply { setMargins(dp(28), dp(16), dp(28), 0) }
         )
         return root
     }

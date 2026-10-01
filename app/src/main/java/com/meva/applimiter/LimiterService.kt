@@ -772,6 +772,14 @@ class LimiterService : AccessibilityService() {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         }
 
+        // sabit üst çubuk: soru istatistikleri butonu sayfanın en üstünde (butonu showStats tanımlanınca eklenir)
+        val topBar = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(10), dp(24), dp(2))
+        }
+        root.addView(topBar, 0, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+
         // boş bir yere dokununca klavye kapansın
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val dismissKeyboard = {
@@ -797,6 +805,7 @@ class LimiterService : AccessibilityService() {
             card.visibility = if (quizOn || statsOn) View.GONE else View.VISIBLE
             quizPane.visibility = if (quizOn) View.VISIBLE else View.GONE
             statsHolder.visibility = if (statsOn) View.VISIBLE else View.GONE
+            topBar.visibility = if (!compact && !quizOn && !statsOn) View.VISIBLE else View.GONE
             bottomBar.visibility = if (compact) View.GONE else View.VISIBLE   // acil/SMS soru çözerken de açık
             val size = if (hero) 56f else 36f
             if (size != countdownSize) {
@@ -821,6 +830,7 @@ class LimiterService : AccessibilityService() {
             applyMode()
             scroll.post { scroll.scrollTo(0, 0) }
         }
+        topBar.addView(StatsUi.button(this) { showStats() })
 
         fun personBtn(p: Person) = TextView(this).apply {
             text = p.label
@@ -841,11 +851,8 @@ class LimiterService : AccessibilityService() {
 
         fun refreshPersonBox() {
             personBox.removeAllViews()
-            personBox.addView(StatsUi.button(this) { showStats() }, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply { topMargin = dp(20) })
             if (prefs.getBoolean("scr_quiz_used", false)) {
-                personBox.addView(label("Bu kilit döngüsünde soru hakkı kullanıldı", 12f, 0xFF94A3B8.toInt(), false, 14))
+                personBox.addView(label("Bu kilit döngüsünde soru hakkı kullanıldı", 12f, 0xFF94A3B8.toInt(), false, 20))
                 return
             }
             personBox.addView(label(
