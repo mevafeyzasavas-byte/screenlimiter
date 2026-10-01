@@ -1,0 +1,74 @@
+# FEYZA SORULARI
+# Biçim: soru, 4 şık (A. B. C. D.) ve "Cevap: X" satırı. Boş satırlar önemsiz, # ile başlayan satırlar yorumdur.
+# Numara (1.) yazmasan da olur. Doğru şıkkın başına * koymak da "Cevap:" yerine geçer (örn. *C. Yaya geçidi).
+# Dosyayı UTF-8 kaydet. 100 soruyu alt alta ekle; 4 şıkkı ya da cevabı eksik kayıtlar atlanır.
+
+1. Aşağıdaki harflerden hangisi bir sesli (ünlü) harftir?
+A. B
+B. K
+C. A
+D. M
+Cevap: C
+
+2. Ayşe'nin 3 elması vardı. Annesi ona 2 elma daha verdi. Ayşe'nin toplam kaç elması oldu?
+A. 4
+B. 5
+C. 6
+D. 3
+Cevap: B
+
+3. Ağaç dalında 6 kuş oturuyordu. Bunlardan 2 tanesi uçup gitti. Dalda kaç kuş kaldı?
+A. 4
+B. 3
+C. 8
+D. 5
+Cevap: A
+
+4. Sabah uykudan uyandığımızda güne zinde başlamak ve sağlıklı olmak için ilk yapmamız gereken kişisel bakım hangisidir?
+A. Ellerimizi ve yüzümüzü yıkamak
+B. Ayakkabıyla yatağa girmek
+C. Okul çantasını pencereden atmak
+D. Hiçbir şey yapmadan bütün gün televizyon izlemek
+Cevap: A
+
+5. Sokakta yürürken veya okuldan eve giderken karşıdan karşıya güvenli bir şekilde geçmek için hangisini kullanmalıyız?
+A. Hareketli arabaların arasından atlamak
+B. Gözümüzü kapatıp koşmak
+C. Yaya geçidini (veya üst/alt geçidi) kullanmak
+D. Otobanın ortasında durmak
+Cevap: C
+
+6. İngilizce'de biriyle karşılaştığımızda söylediğimiz "Hello" kelimesinin Türkçe anlamı nedir?
+A. Güle güle
+B. Merhaba
+C. Günaydın
+D. İyi akşamlar
+Cevap: B
+
+7. İngilizce "three" sayısı hangi rakama karşılık gelir?
+A. 4
+B. 5
+C. 3
+D. 2
+Cevap: C
+
+8. İngilizce renk ismi olan "red" hangi renktir?
+A. Kırmızı
+B. Mavi
+C. Sarı
+D. Yeşil
+Cevap: A
+
+9. İngilizce'de "cat" olarak adlandırılan sevimli evcil hayvan hangisidir?
+A. Köpek
+B. Kuş
+C. Balık
+D. Kedi
+Cevap: D
+
+10. Türkçe'de "Güle güle" demek için hangi İngilizce ifadeyi kullanırız?
+A. Hello
+B. Goodbye
+C. Good morning
+D. Please
+Cevap: B
