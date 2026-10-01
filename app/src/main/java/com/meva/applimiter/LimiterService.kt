@@ -70,6 +70,7 @@ class LimiterService : AccessibilityService() {
     private var scrGifSince = 0L                 // o gif'in ekrana geldiği an (elapsedRealtime)
     private var scrGifCycle = 0L                 // hangi kilit döngüsüne ait (scr_lock_until)
     private var scrKb: KeyboardWatcher? = null   // kart içindeki klavye/sistem çubuğu izleyicisi
+    private var scrQuiz: QuizSession? = null     // Beyza/Feyza soru çözme denemesi (kart yeniden kurulsa da korunur)
     private val waitGifs = intArrayOf(
         R.raw.wait_gif, R.raw.wait_gif_3, R.raw.wait_gif_4,
         R.raw.wait_gif_5, R.raw.wait_gif_6, R.raw.wait_gif_7
@@ -386,7 +387,9 @@ class LimiterService : AccessibilityService() {
             .putLong("scr_lock_until", System.currentTimeMillis() + lockLen)
             .putLong("scr_extra_until", 0L)
             .putBoolean("scr_extra_used", false)
+            .putBoolean("scr_quiz_used", false)
             .apply()
+        scrQuiz = null
         enforceScreenLock()
         performGlobalAction(GLOBAL_ACTION_HOME)
     }
@@ -493,6 +496,15 @@ class LimiterService : AccessibilityService() {
             .putLong("scr_extra_until", System.currentTimeMillis() + Config.EXTRA_MS)
             .apply()
         toast("${Config.EXTRA_MS / 60_000} dk ek süre verildi")
+        enforceScreenLock()
+    }
+
+    // 3 soruyu da doğru bilince: tek seferlik ek süre ver, kartı kaldır.
+    // Şifreyle verilen ek sürenin hakkından (scr_extra_used) bağımsızdır; soru hakkı ayrı tutulur (scr_quiz_used).
+    private fun grantQuizExtra() {
+        val until = System.currentTimeMillis() + Config.EXTRA_MS
+        prefs.edit().putLong("scr_extra_until", maxOf(until, scrExtraUntil())).apply()
+        toast("${Config.EXTRA_MS / 60_000} dk ek süre kazandın 🎉")
         enforceScreenLock()
     }
 
@@ -693,6 +705,14 @@ class LimiterService : AccessibilityService() {
             12f, 0xFF94A3B8.toInt(), false, if (extraAvailable) 12 else 24
         )
 
+        // ---- Beyza / Feyza soru çözme (şifre kartının üstünde) ----
+        scrQuiz?.let { if (it.cycle != scrLockUntil()) scrQuiz = null }   // eski kilit döngüsünden kalan deneme
+        val quizPane = QuizPane(this).apply { visibility = View.GONE }
+        val personBox = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
         // ---- orta bölüm (kaydırılabilir; kısa kalırsa dikey ortalanır) ----
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -704,12 +724,17 @@ class LimiterService : AccessibilityService() {
             addView(title)
             addView(countdown)
             addView(subtitle)
+            addView(personBox, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
             if (extraAvailable) {
                 addView(card, LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
                 ).apply { topMargin = dp(24) })
             }
             addView(hint)
+            addView(quizPane, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(16) })
         }
 
         val scroll = ScrollView(this).apply {
@@ -752,21 +777,107 @@ class LimiterService : AccessibilityService() {
         root.setOnClickListener { dismissKeyboard() }
         content.setOnClickListener { dismissKeyboard() }
 
-        // ---- klavye açılınca kompakt mod ----
+        // ---- görünüm modları: normal / klavye açık (kompakt) / soru çözme ----
         var compact = false
-        fun setCompact(on: Boolean) {
-            if (compact == on) return
-            compact = on
+        var countdownSize = 56f
+        fun applyMode() {
             TransitionManager.beginDelayedTransition(root)
-            val v = if (on) View.GONE else View.VISIBLE
-            gifView.visibility = v
-            title.visibility = v
-            hint.visibility = v
-            bottomBar.visibility = v
-            countdown.textSize = if (on) 40f else 56f
-            // şifre alanı + buton her durumda görünür kalsın
-            if (on) scroll.post { scroll.smoothScrollTo(0, content.height) }
+            val quizOn = scrQuiz != null
+            val hero = !compact && !quizOn
+            val heroV = if (hero) View.VISIBLE else View.GONE
+            gifView.visibility = heroV
+            title.visibility = heroV
+            hint.visibility = heroV
+            personBox.visibility = heroV
+            card.visibility = if (quizOn) View.GONE else View.VISIBLE
+            quizPane.visibility = if (quizOn) View.VISIBLE else View.GONE
+            bottomBar.visibility = if (compact) View.GONE else View.VISIBLE   // acil/SMS soru çözerken de açık
+            val size = if (hero) 56f else 36f
+            if (size != countdownSize) {
+                countdownSize = size
+                countdown.textSize = size
+            }
+            // şifre alanı + buton klavye açıkken de görünür kalsın
+            if (compact && !quizOn) scroll.post { scroll.smoothScrollTo(0, content.height) }
         }
+
+        fun startQuiz(p: Person) {
+            val s = QuizSession(p, scrLockUntil(), QuizBank.load(this, p).size)
+            scrQuiz = s
+            quizPane.bind(s)
+            applyMode()
+        }
+
+        fun personBtn(p: Person) = TextView(this).apply {
+            text = p.label
+            textSize = 17f
+            setTextColor(accentDark)
+            gravity = Gravity.CENTER
+            setTypeface(typeface, Typeface.BOLD)
+            setPadding(dp(8), dp(16), dp(8), dp(16))
+            background = GradientDrawable().apply {
+                cornerRadius = dp(20).toFloat()
+                setColor(0xFFEAF7F6.toInt())
+                setStroke(dp(1), 0xFFCFEFEC.toInt())
+            }
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                .apply { marginStart = dp(6); marginEnd = dp(6) }
+            setOnClickListener { startQuiz(p) }
+        }
+
+        fun refreshPersonBox() {
+            personBox.removeAllViews()
+            if (prefs.getBoolean("scr_quiz_used", false)) {
+                personBox.addView(label("Bu kilit döngüsünde soru hakkı kullanıldı", 12f, 0xFF94A3B8.toInt(), false, 20))
+                return
+            }
+            personBox.addView(label(
+                "Soru çöz, ${Config.EXTRA_MS / 60_000} dk ek süre kazan", 13f, 0xFF64748B.toInt(), true, 20))
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(10) }
+                for (p in Person.values()) addView(personBtn(p))
+            }
+            personBox.addView(row)
+        }
+
+        quizPane.host = object : QuizPane.Host {
+            override fun onBegin(session: QuizSession): Boolean {
+                val qs = QuizBank.draw(this@LimiterService, prefs, session.person)
+                if (qs.size < QuizBank.COUNT) return false
+                prefs.edit().putBoolean("scr_quiz_used", true).apply()   // deneme hakkı başlarken tüketilir
+                session.questions = qs
+                session.started = true
+                return true
+            }
+
+            override fun onBack() {
+                scrQuiz = null
+                applyMode()
+            }
+
+            override fun onChanged(newPage: Boolean) {
+                scroll.post {
+                    if (newPage) scroll.scrollTo(0, 0) else scroll.smoothScrollTo(0, content.height)
+                }
+            }
+
+            override fun onDone(passed: Boolean) {
+                scrQuiz = null
+                if (passed) {
+                    grantQuizExtra()
+                } else {
+                    refreshPersonBox()
+                    applyMode()
+                }
+            }
+        }
+
+        refreshPersonBox()
+        scrQuiz?.let { quizPane.bind(it) }
+        applyMode()
 
         // pencere: tüm ekran (çentik + sistem çubukları altı dahil), klavye için yeniden boyutlanabilir
         val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -805,7 +916,10 @@ class LimiterService : AccessibilityService() {
             View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
 
         val kb = KeyboardWatcher(root) { bars, kbTotal, kbPad ->
-            setCompact(kbTotal > 0)
+            if (compact != (kbTotal > 0)) {
+                compact = kbTotal > 0
+                applyMode()
+            }
             // içerik sistem çubuklarının ve klavyenin altında kalmasın
             root.setPadding(bars.left, bars.top, bars.right, maxOf(bars.bottom, kbPad))
         }
