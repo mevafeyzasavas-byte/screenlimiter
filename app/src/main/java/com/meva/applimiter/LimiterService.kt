@@ -8,7 +8,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
+import android.transition.TransitionManager
+import android.util.DisplayMetrics
 import android.text.InputType
 import android.graphics.PixelFormat
 import android.graphics.Typeface
@@ -61,6 +64,12 @@ class LimiterService : AccessibilityService() {
     private var scrGifRotate: Runnable? = null   // kilit kartındaki gif'i 7 sn'de bir değiştirir
     private var scrPwdTick: Runnable? = null     // yanlış deneme kilidinin geri sayımı
     private var lastWaitGif = -1
+    // gif durumu servis tarafında tutulur: ekran kapanıp açılınca kart yeniden kurulsa da
+    // lock_gif'ten tekrar başlamaz, kaldığı yerden devam eder
+    private var scrGifRes = R.raw.lock_gif       // kartta şu an gösterilen gif
+    private var scrGifSince = 0L                 // o gif'in ekrana geldiği an (elapsedRealtime)
+    private var scrGifCycle = 0L                 // hangi kilit döngüsüne ait (scr_lock_until)
+    private var scrKb: KeyboardWatcher? = null   // kart içindeki klavye/sistem çubuğu izleyicisi
     private val waitGifs = intArrayOf(
         R.raw.wait_gif, R.raw.wait_gif_3, R.raw.wait_gif_4,
         R.raw.wait_gif_5, R.raw.wait_gif_6, R.raw.wait_gif_7
@@ -127,6 +136,15 @@ class LimiterService : AccessibilityService() {
         if (pkg == packageName && (overlayView != null || scrLockView != null)) return   // kendi kartımızı yok say
         if (pkg in ignoredPackages()) return
         onForeground(pkg)
+    }
+
+    // Yön değişince tam ekran kart yeni ekran boyutuyla yeniden kurulur (gif/zaman kaldığı yerden devam eder)
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (scrLockView != null) {
+            hideScreenLock()
+            enforceScreenLock()
+        }
     }
 
     override fun onInterrupt() {
@@ -478,8 +496,28 @@ class LimiterService : AccessibilityService() {
         enforceScreenLock()
     }
 
+    private fun gifPeriod(res: Int) = if (res == R.raw.lock_gif) GIF_FIRST_MS else GIF_ROTATE_MS
+
+    // Ekranın gerçek (sistem çubukları dahil) boyutu: kart bunun tamamını kaplasın
+    @Suppress("DEPRECATION")
+    private fun realScreenSize(wm: WindowManager): Pair<Int, Int> {
+        if (Build.VERSION.SDK_INT >= 30) {
+            val b = wm.maximumWindowMetrics.bounds
+            return Pair(b.width(), b.height())
+        }
+        val m = DisplayMetrics()
+        wm.defaultDisplay.getRealMetrics(m)
+        return Pair(m.widthPixels, m.heightPixels)
+    }
+
     // Tek ekran: şifre ekranı tasarımı + geri sayım + acil arama/SMS.
     // İlk GIF_FIRST_MS lock_gif, sonra her GIF_ROTATE_MS'de bir rastgele bekleme gif'i.
+    //
+    // Yerleşim: tam ekran pencere (çentik ve sistem çubukları dahil) →
+    //   [ kaydırılabilir orta bölüm: gif, başlık, geri sayım, şifre kartı ]
+    //   [ sabit alt çubuk: Acil arama / SMS ]  (her zaman tam görünür)
+    // Klavye açılınca "kompakt mod": gif/başlık/alt çubuk gizlenir, geri sayım + şifre alanı + "Aç"
+    // butonu klavyenin hemen üstünde kalır.
     private fun showScreenLock() {
         if (scrLockView != null) return
         val d = resources.displayMetrics.density
@@ -518,10 +556,24 @@ class LimiterService : AccessibilityService() {
             setOnClickListener { onClick() }
         }
 
-        val gifView = GifView(this).apply { setGifResource(R.raw.lock_gif) }
+        // ---- gif durumu: kart ekran kapanıp açılınca yeniden kurulsa da kaldığı yerden devam eder ----
+        val nowRt = SystemClock.elapsedRealtime()
+        val cycle = scrLockUntil()
+        if (scrGifCycle != cycle) {              // yeni kilit döngüsü: lock_gif ile başla
+            scrGifCycle = cycle
+            scrGifRes = R.raw.lock_gif
+            scrGifSince = nowRt
+        } else if (nowRt - scrGifSince >= gifPeriod(scrGifRes)) {   // ekran kapalıyken süre geçti
+            scrGifRes = pickWaitGif()
+            scrGifSince = nowRt
+        }
+        val gifSize = minOf(dp(220), (resources.displayMetrics.heightPixels * 0.26f).toInt())
+        val gifView = GifView(this).apply { setGifResource(scrGifRes) }
 
+        val title = label("Ekran süresi doldu", 22f, 0xFF0F172A.toInt(), true, 8)
         val countdown = label(clock(scrLockUntil() - System.currentTimeMillis()), 56f, accentDark, true, 12)
         countdown.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+        val subtitle = label("Kilidin açılmasına kalan süre", 14f, 0xFF64748B.toInt(), false, 4)
 
         val extraAvailable = !prefs.getBoolean("scr_extra_used", false)
 
@@ -635,12 +687,42 @@ class LimiterService : AccessibilityService() {
         input.setOnEditorActionListener { _, _, _ -> check(); true }
         okBtn.setOnClickListener { check() }
 
-        // ---- acil arama / SMS (kilitliyken de serbest) ----
-        val row = LinearLayout(this).apply {
+        val hint = label(
+            if (extraAvailable) "Doğru şifreyle tek seferlik ${Config.EXTRA_MS / 60_000} dakika ek süre kazanırsın"
+            else "Bu kilit döngüsünde ek süre zaten kullanıldı",
+            12f, 0xFF94A3B8.toInt(), false, if (extraAvailable) 12 else 24
+        )
+
+        // ---- orta bölüm (kaydırılabilir; kısa kalırsa dikey ortalanır) ----
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(dp(28), dp(16), dp(28), dp(16))
+            isFocusableInTouchMode = true       // klavyeyi kapatırken odak EditText'e geri dönmesin
+            addView(gifView,
+                LinearLayout.LayoutParams(gifSize, gifSize).apply { gravity = Gravity.CENTER_HORIZONTAL })
+            addView(title)
+            addView(countdown)
+            addView(subtitle)
+            if (extraAvailable) {
+                addView(card, LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(24) })
+            }
+            addView(hint)
+        }
+
+        val scroll = ScrollView(this).apply {
+            isVerticalScrollBarEnabled = false
+            isFillViewport = true
+            addView(content, FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        }
+
+        // ---- sabit alt çubuk: acil arama / SMS (kilitliyken de serbest, her zaman tam görünür) ----
+        val bottomBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply { topMargin = dp(24) }
+            setPadding(dp(24), dp(8), dp(24), dp(16))
             addView(pill("📞 Acil arama") {
                 openBelowCard { startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:112")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
             })
@@ -649,73 +731,109 @@ class LimiterService : AccessibilityService() {
             })
         }
 
-        val content = LinearLayout(this).apply {
+        val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(dp(28), dp(48), dp(28), dp(32))
-            addView(gifView,
-                LinearLayout.LayoutParams(dp(220), dp(220)).apply { gravity = Gravity.CENTER_HORIZONTAL })
-            addView(label("Ekran süresi doldu", 22f, 0xFF0F172A.toInt(), true, 8))
-            addView(countdown)
-            addView(label("Kilidin açılmasına kalan süre", 14f, 0xFF64748B.toInt(), false, 4))
-            if (extraAvailable) {
-                addView(card, LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply { topMargin = dp(24) })
-                addView(label("Doğru şifreyle tek seferlik ${Config.EXTRA_MS / 60_000} dakika ek süre kazanırsın",
-                    12f, 0xFF94A3B8.toInt(), false, 12))
-            } else {
-                addView(label("Bu kilit döngüsünde ek süre zaten kullanıldı",
-                    12f, 0xFF94A3B8.toInt(), false, 24))
-            }
-            addView(row)
-        }
-
-        val root = FrameLayout(this).apply {
             background = GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(0xFFF3F6FA.toInt(), 0xFFFFFFFF.toInt())
             )
             isClickable = true   // dokunuşlar alttaki uygulamaya geçmesin
-            addView(ScrollView(this@LimiterService).apply {
-                isVerticalScrollBarEnabled = false
-                isFillViewport = true
-                addView(content, FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-            }, FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+            addView(scroll, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+            addView(bottomBar, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         }
 
-        // NOT_FOCUSABLE bilerek yok: şifre alanına yazı yazılabilsin (klavye açılsın)
+        // boş bir yere dokununca klavye kapansın
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val dismissKeyboard = {
+            content.requestFocus()
+            imm.hideSoftInputFromWindow(input.windowToken, 0)
+        }
+        root.setOnClickListener { dismissKeyboard() }
+        content.setOnClickListener { dismissKeyboard() }
+
+        // ---- klavye açılınca kompakt mod ----
+        var compact = false
+        fun setCompact(on: Boolean) {
+            if (compact == on) return
+            compact = on
+            TransitionManager.beginDelayedTransition(root)
+            val v = if (on) View.GONE else View.VISIBLE
+            gifView.visibility = v
+            title.visibility = v
+            hint.visibility = v
+            bottomBar.visibility = v
+            countdown.textSize = if (on) 40f else 56f
+            // şifre alanı + buton her durumda görünür kalsın
+            if (on) scroll.post { scroll.smoothScrollTo(0, content.height) }
+        }
+
+        // pencere: tüm ekran (çentik + sistem çubukları altı dahil), klavye için yeniden boyutlanabilir
+        val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val lp = WindowManager.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                @Suppress("DEPRECATION") WindowManager.LayoutParams.FLAG_FULLSCREEN,
             PixelFormat.TRANSLUCENT
         ).apply {
-            softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN or
+            gravity = Gravity.TOP or Gravity.START
+            // NOT_FOCUSABLE bilerek yok: şifre alanına yazı yazılabilsin (klavye açılsın)
+            softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
+            if (Build.VERSION.SDK_INT >= 30) {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+            } else if (Build.VERSION.SDK_INT >= 28) {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+            try {
+                val (w, h) = realScreenSize(wm)
+                width = w
+                height = h
+            } catch (e: Exception) {
+            }
         }
+        // sistem çubuklarını gizle (elle kaydırınca geçici görünür) – desteklemeyen cihazda zararsız
+        @Suppress("DEPRECATION")
+        root.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+
+        val kb = KeyboardWatcher(root) { bars, kbTotal, kbPad ->
+            setCompact(kbTotal > 0)
+            // içerik sistem çubuklarının ve klavyenin altında kalmasın
+            root.setPadding(bars.left, bars.top, bars.right, maxOf(bars.bottom, kbPad))
+        }
+
         try {
-            (getSystemService(Context.WINDOW_SERVICE) as WindowManager).addView(root, lp)
+            wm.addView(root, lp)
         } catch (e: Exception) {
             scrPwdTick?.let { handler.removeCallbacks(it) }
             scrPwdTick = null
             return
         }
         scrLockView = root
+        scrKb = kb
+        kb.start()
 
-        // ilk 7 sn lock_gif, sonra her 7 sn'de bir rastgele bekleme gif'i
-        val rotate = object : Runnable {
-            override fun run() {
-                gifView.setGifResource(pickWaitGif())
-                handler.postDelayed(this, GIF_ROTATE_MS)
+        // ilk 7 sn lock_gif, sonra her 7 sn'de bir rastgele bekleme gif'i (kaldığı yerden devam eder)
+        fun scheduleGif() {
+            val wait = maxOf(50L, scrGifSince + gifPeriod(scrGifRes) - SystemClock.elapsedRealtime())
+            val r = Runnable {
+                scrGifRes = pickWaitGif()
+                scrGifSince = SystemClock.elapsedRealtime()
+                gifView.setGifResource(scrGifRes)
+                scheduleGif()
             }
+            scrGifRotate = r
+            handler.postDelayed(r, wait)
         }
-        scrGifRotate = rotate
-        handler.postDelayed(rotate, GIF_FIRST_MS)
+        scheduleGif()
 
         val tick = object : Runnable {
             override fun run() {
@@ -740,6 +858,8 @@ class LimiterService : AccessibilityService() {
         scrGifRotate = null
         scrPwdTick?.let { handler.removeCallbacks(it) }
         scrPwdTick = null
+        scrKb?.stop()
+        scrKb = null
         scrLockView?.let {
             try {
                 (getSystemService(Context.WINDOW_SERVICE) as WindowManager).removeView(it)
