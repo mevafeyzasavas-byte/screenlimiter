@@ -1,0 +1,81 @@
+# BEYZA SORULARI
+# Biçim: soru, 4 şık (A. B. C. D.) ve "Cevap: X" satırı. Boş satırlar önemsiz, # ile başlayan satırlar yorumdur.
+# Numara (1.) yazmasan da olur. Doğru şıkkın başına * koymak da "Cevap:" yerine geçer (örn. *C. Cebrail).
+# Dosyayı UTF-8 kaydet. 100 soruyu alt alta ekle; 4 şıkkı ya da cevabı eksik kayıtlar atlanır.
+
+1. Kur'an-ı Kerim okurken harfleri uzatmak için kullanılan harf-i med (uzatma harfleri) aşağıdakilerden hangisidir?
+A. Elif, Vav, Yâ
+B. Ba, Tâ, Sâ
+C. Elif, Mîm, Râ
+D. Dal, Zel, Ra
+Cevap: A
+
+2. Arapçada "صباح الخير" (Sabahul hayr) ifadesinin Türkçe anlamı nedir?
+A. İyi akşamlar
+B. Günaydın
+C. Teşekkür ederim
+D. Hoş geldiniz
+Cevap: B
+
+3. Yüce Allah'ın emir ve yasaklarını peygamberlere vahyeden (ileten) büyük melek kimdir?
+A. Mikail (a.s.)
+B. İsrafil (a.s.)
+C. Cebrail (a.s.)
+D. Azrail (a.s.)
+Cevap: C
+
+4. Sabah namazının sünneti ve farzı sırasıyla toplam kaç rekattır?
+A. 2 rekat sünnet, 4 rekat farz
+B. 4 rekat sünnet, 2 rekat farz
+C. Sadece 2 rekat farz
+D. 2 rekat sünnet, 2 rekat farz
+Cevap: D
+
+5. Aşağıdaki cümlelerin hangisinde "tatlı" sözcüğü mecaz anlamda kullanılmıştır?
+A. Annemin yaptığı tatlı kurabiyeleri çok beğendim.
+B. Onun tatlı dili sayesinde herkesle hemen anlaşıyorlar.
+C. Buzdolabından çıkardığı tatlı kavunu dilimledi.
+D. Çaya iki şeker attığı için içecek oldukça tatlıydı.
+Cevap: B
+
+6. 50 sayısının %20'si kaçtır?
+A. 5
+B. 12
+C. 15
+D. 10
+Cevap: D
+
+7. Ay'ın Dünya etrafındaki dolanma hareketi yaklaşık kaç günde tamamlanır?
+A. 24 saat
+B. 365 gün
+C. Yaklaşık 29 buçuk gün
+D. 7 gün
+Cevap: C
+
+8. Aşağıdakilerden hangisi Birleşmiş Milletler Çocuk Hakları Sözleşmesi'ne göre çocukların temel haklarından biri değildir?
+A. Eğitim alma hakkı
+B. Sağlık hizmetlerinden yararlanma hakkı
+C. Düzenli olarak vergi ödeme sorumluluğu
+D. Oyun oynamak ve dinlenmek hakkı
+Cevap: C
+
+9. Bir İngilizce dersinde arkadaşınız size "Where are you from?" diye sorduğunda, aşağıdakilerden hangisiyle cevap vermeniz uygun olur?
+A. I am from Turkey.
+B. I am ten years old.
+C. I like playing football.
+D. My name is Ahmet.
+Cevap: A
+
+10. Aşağıdaki canlılardan hangisi mantarlar grubuna örnek olarak gösterilemez?
+A. Küf mantarı
+B. Şapkalı mantar
+C. Maya mantarı
+D. Kara yosunu
+Cevap: D
+
+11. İçinde yer aldığımız ilk ve en temel sosyal kurum aşağıdakilerden hangisidir?
+A. Okul
+B. Spor kulübü
+C. Mahalle derneği
+D. Aile
+Cevap: D
