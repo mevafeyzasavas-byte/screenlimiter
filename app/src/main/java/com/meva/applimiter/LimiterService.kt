@@ -33,6 +33,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -725,6 +726,7 @@ class LimiterService : AccessibilityService() {
         scrQuiz?.let { if (it.cycle != scrLockUntil()) scrQuiz = null }   // eski kilit döngüsünden kalan deneme
         val quizPane = QuizPane(this).apply { visibility = View.GONE }
         val statsHolder = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
+        val exemptHolder = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
         val personBox = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
@@ -753,6 +755,9 @@ class LimiterService : AccessibilityService() {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply { topMargin = dp(16) })
             addView(statsHolder, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(16) })
+            addView(exemptHolder, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply { topMargin = dp(16) })
         }
@@ -808,20 +813,22 @@ class LimiterService : AccessibilityService() {
         // ---- görünüm modları: normal / klavye açık (kompakt) / soru çözme ----
         var compact = false
         var statsOn = false
+        var exemptOn = false
         var countdownSize = 56f
         fun applyMode() {
             TransitionManager.beginDelayedTransition(root)
             val quizOn = scrQuiz != null
-            val hero = !compact && !quizOn && !statsOn
+            val hero = !compact && !quizOn && !statsOn && !exemptOn
             val heroV = if (hero) View.VISIBLE else View.GONE
             gifView.visibility = heroV
             title.visibility = heroV
             hint.visibility = heroV
             personBox.visibility = heroV
-            card.visibility = if (quizOn || statsOn) View.GONE else View.VISIBLE
+            card.visibility = if (quizOn || statsOn || exemptOn) View.GONE else View.VISIBLE
             quizPane.visibility = if (quizOn) View.VISIBLE else View.GONE
             statsHolder.visibility = if (statsOn) View.VISIBLE else View.GONE
-            topBar.visibility = if (!compact && !quizOn && !statsOn) View.VISIBLE else View.GONE
+            exemptHolder.visibility = if (exemptOn) View.VISIBLE else View.GONE
+            topBar.visibility = if (!compact && !quizOn && !statsOn && !exemptOn) View.VISIBLE else View.GONE
             bottomBar.visibility = if (compact) View.GONE else View.VISIBLE   // acil/SMS soru çözerken de açık
             val size = if (hero) 56f else 36f
             if (size != countdownSize) {
@@ -829,7 +836,7 @@ class LimiterService : AccessibilityService() {
                 countdown.textSize = size
             }
             // şifre alanı + buton klavye açıkken de görünür kalsın
-            if (compact && !quizOn && !statsOn) scroll.post { scroll.smoothScrollTo(0, content.height) }
+            if (compact && !quizOn && !statsOn && !exemptOn) scroll.post { scroll.smoothScrollTo(0, content.height) }
         }
 
         fun startQuiz(p: Person) {
@@ -847,6 +854,92 @@ class LimiterService : AccessibilityService() {
             scroll.post { scroll.scrollTo(0, 0) }
         }
         topBar.addView(StatsUi.button(this) { showStats() })
+
+        // ---- harici (kapsam dışı) uygulamalar: listeden dokunup doğrudan aç ----
+        fun exemptRow(pkg: String): Pair<String, View>? {
+            val launch = packageManager.getLaunchIntentForPackage(pkg) ?: return null
+            val name = try {
+                packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString()
+            } catch (e: Exception) { return null }
+            val icon = try { packageManager.getApplicationIcon(pkg) } catch (e: Exception) { null }
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(16), dp(12), dp(16), dp(12))
+                background = GradientDrawable().apply {
+                    cornerRadius = dp(20).toFloat()
+                    setColor(0xFFFFFFFF.toInt())
+                    setStroke(dp(1), 0xFFEDF1F6.toInt())
+                }
+                elevation = dp(4).toFloat()
+                if (icon != null) {
+                    addView(ImageView(this@LimiterService).apply { setImageDrawable(icon) },
+                        LinearLayout.LayoutParams(dp(40), dp(40)))
+                }
+                addView(TextView(this@LimiterService).apply {
+                    text = name
+                    textSize = 16f
+                    setTextColor(0xFF0F172A.toInt())
+                    setTypeface(typeface, Typeface.BOLD)
+                }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                    .apply { marginStart = dp(14) })
+                addView(TextView(this@LimiterService).apply {
+                    text = "Aç ›"
+                    textSize = 14f
+                    setTextColor(accentDark)
+                    setTypeface(typeface, Typeface.BOLD)
+                })
+                setOnClickListener {
+                    // kartı kısa süre gizleyip uygulamayı aç; ön plana gelince kapsam dışı olduğu için kart kalkık kalır
+                    openBelowCard {
+                        startActivity(Intent(launch).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    }
+                }
+            }
+            return Pair(name, row)
+        }
+
+        fun showExempt() {
+            exemptHolder.removeAllViews()
+            exemptHolder.addView(label("Harici uygulamalar", 20f, 0xFF0F172A.toInt(), true, 0))
+            val rows = scrExemptPkgs().mapNotNull { exemptRow(it) }
+                .sortedBy { it.first.lowercase(Locale.getDefault()) }
+            if (rows.isEmpty()) {
+                exemptHolder.addView(label("Kapsam dışı uygulama seçilmemiş", 14f, 0xFF64748B.toInt(), false, 16))
+            } else {
+                for ((_, v) in rows) {
+                    exemptHolder.addView(v, LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply { topMargin = dp(10) })
+                }
+            }
+            exemptHolder.addView(pill("Geri") { exemptOn = false; applyMode() }.apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(16) }
+            })
+            exemptOn = true
+            applyMode()
+            scroll.post { scroll.scrollTo(0, 0) }
+        }
+
+        topBar.addView(TextView(this).apply {
+            text = "Harici uygulamalar"
+            textSize = 15f
+            setTextColor(accentDark)
+            gravity = Gravity.CENTER
+            setTypeface(typeface, Typeface.BOLD)
+            setPadding(dp(8), dp(12), dp(8), dp(12))
+            background = GradientDrawable().apply {
+                cornerRadius = dp(20).toFloat()
+                setColor(0xFFEAF7F6.toInt())
+                setStroke(dp(1), 0xFFCFEFEC.toInt())
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(8) }
+            setOnClickListener { showExempt() }
+        })
 
         fun personBtn(p: Person) = TextView(this).apply {
             text = p.label
