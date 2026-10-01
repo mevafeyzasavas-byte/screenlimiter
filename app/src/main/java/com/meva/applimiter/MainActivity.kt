@@ -47,6 +47,7 @@ class MainActivity : Activity() {
     private lateinit var mainView: View
     private lateinit var adminBtn: Button
     private lateinit var screenBtn: Button
+    private lateinit var exemptBtn: Button
     private var guardMode = false     // koruma ekranından (silme/ayar) açıldı mı
     private var unlockPkg: String? = null   // "sınırsız" bir uygulamayı açmak için şifre isteniyor mu
     private var extraPkg: String? = null    // kilitli bir uygulamaya 15 dk'lık ek süre için şifre isteniyor mu
@@ -123,6 +124,7 @@ class MainActivity : Activity() {
         }
 
         screenBtn = Button(this).apply { setOnClickListener { showScreenLimitDialog() } }
+        exemptBtn = Button(this).apply { setOnClickListener { showExemptDialog() } }
 
         mainView = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -132,6 +134,7 @@ class MainActivity : Activity() {
             addView(header)
             addView(status)
             addView(screenBtn)
+            addView(exemptBtn)
             addView(btn)
             addView(adminBtn)
         }
@@ -198,6 +201,7 @@ class MainActivity : Activity() {
         adminBtn.text = if (active) "Silme koruması: AÇIK ✔" else "Silme korumasını aç"
         adminBtn.isEnabled = !active
         updateScreenBtn()
+        updateExemptBtn()
     }
 
     // ---- premium şifre ekranı ----
@@ -656,6 +660,81 @@ class MainActivity : Activity() {
     private fun updateScreenBtn() {
         screenBtn.text = if (prefs.getBoolean("scr_enabled", false))
             "Ekran süresi limiti: AÇIK ✔ (ayarla)" else "Ekran süresi limitini ayarla"
+    }
+
+    // ---- ekran süresi limiti kapsamı dışındaki uygulamalar ----
+
+    private fun exemptSet(): MutableSet<String> =
+        HashSet(prefs.getStringSet("scr_exempt", emptySet()) ?: emptySet())
+
+    private fun updateExemptBtn() {
+        val n = exemptSet().size
+        exemptBtn.text = if (n == 0) "Kapsam dışı uygulamaları seç"
+        else "Kapsam dışı uygulamalar: $n seçili (düzenle)"
+    }
+
+    // Telefondaki başlatılabilir (launcher'da görünen) uygulamalar, kendimiz hariç
+    private fun loadLaunchableApps(): List<AppItem> {
+        val pm = packageManager
+        val i = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        return pm.queryIntentActivities(i, 0)
+            .filter { it.activityInfo.packageName != packageName }
+            .distinctBy { it.activityInfo.packageName }
+            .map { AppItem(it.loadLabel(pm).toString(), it.activityInfo.packageName, it.loadIcon(pm)) }
+            .sortedBy { it.label.lowercase(Locale.getDefault()) }
+    }
+
+    // Seçilen uygulamalarda ekran süresi sayılmaz ve kilit kartı bu uygulamaların üstünü kapatmaz.
+    private fun showExemptDialog() {
+        val items = loadLaunchableApps()
+        val chosen = exemptSet()
+
+        val exAdapter = object : BaseAdapter() {
+            override fun getCount() = items.size
+            override fun getItem(position: Int) = items[position]
+            override fun getItemId(position: Int) = position.toLong()
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val ctx = this@MainActivity
+                val row = (convertView as? LinearLayout) ?: LinearLayout(ctx).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    setPadding(32, 16, 32, 16)
+                    addView(ImageView(ctx), LinearLayout.LayoutParams(96, 96))
+                    addView(TextView(ctx).apply {
+                        textSize = 16f
+                        setPadding(32, 0, 0, 0)
+                    }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+                    addView(CheckBox(ctx).apply {
+                        isClickable = false
+                        isFocusable = false
+                    })
+                }
+                val item = items[position]
+                (row.getChildAt(0) as ImageView).setImageDrawable(item.icon)
+                (row.getChildAt(1) as TextView).text = item.label
+                (row.getChildAt(2) as CheckBox).isChecked = item.pkg in chosen
+                return row
+            }
+        }
+
+        val list = ListView(this).apply {
+            this.adapter = exAdapter
+            setOnItemClickListener { _, _, pos, _ ->
+                val pkg = items[pos].pkg
+                if (!chosen.remove(pkg)) chosen.add(pkg)
+                exAdapter.notifyDataSetChanged()
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Ekran süresi kapsamı dışındaki uygulamalar")
+            .setView(list)
+            .setPositiveButton("Kaydet") { _, _ ->
+                prefs.edit().putStringSet("scr_exempt", HashSet(chosen)).apply()
+                updateExemptBtn()
+            }
+            .setNegativeButton("İptal", null)
+            .show()
     }
 
     // 0 = kapalı; dakika değeri, gösterim etiketi

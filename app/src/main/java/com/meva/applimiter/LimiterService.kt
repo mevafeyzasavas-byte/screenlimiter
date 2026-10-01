@@ -78,7 +78,7 @@ class LimiterService : AccessibilityService() {
     private var scrSuppressUntil = 0L        // acil arama/SMS/şifre açılırken kartı kısa süre gizli tut
     private var fgPkg: String? = null        // ekrandaki son uygulama (kilit kartı kararı için)
     private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == "scr_extra_until" || key == "scr_enabled") enforceScreenLock()
+        if (key == "scr_extra_until" || key == "scr_enabled" || key == "scr_exempt") enforceScreenLock()
     }
 
     private val screenReceiver = object : BroadcastReceiver() {
@@ -323,6 +323,16 @@ class LimiterService : AccessibilityService() {
     // Kart altında yalnızca acil arama / SMS / şifre (ek süre) serbesttir.
 
     private fun scrEnabled() = prefs.getBoolean("scr_enabled", false)
+
+    // Kullanıcının "ekran süresi limiti kapsamı dışı" seçtiği uygulamalar
+    private fun scrExemptPkgs(): Set<String> =
+        prefs.getStringSet("scr_exempt", emptySet()) ?: emptySet()
+
+    // Şu an ekrandaki uygulama kapsam dışı mı?
+    private fun isScrExemptForeground(): Boolean {
+        val p = fgPkg ?: return false
+        return p in scrExemptPkgs()
+    }
     private fun scrLockUntil() = prefs.getLong("scr_lock_until", 0L)
     private fun scrExtraUntil() = prefs.getLong("scr_extra_until", 0L)
 
@@ -360,6 +370,7 @@ class LimiterService : AccessibilityService() {
     private fun scrStart() {
         if (!scrEnabled() || scrOnAt != 0L) return
         if (System.currentTimeMillis() < scrLockUntil()) return   // kilit / ek süre sırasında sayma
+        if (isScrExemptForeground()) return                       // kapsam dışı uygulamada sayma
         rollDay()
         val contLimit = prefs.getLong("scr_cont_ms", Config.SCREEN_CONT_MS)
         val dailyLimit = prefs.getLong("scr_daily_ms", Config.SCREEN_DAILY_MS)
@@ -428,7 +439,11 @@ class LimiterService : AccessibilityService() {
             scheduleScrCheck()
         } else {
             hideScreenLock()
-            if (isInteractive()) scrStart()
+            if (isInteractive()) {
+                // kapsam dışı uygulamada sayaç durur (o ana kadarki süre kaydedilir),
+                // başka uygulamaya geçilince kaldığı yerden devam eder
+                if (isScrExemptForeground()) scrStop() else scrStart()
+            }
         }
     }
 
@@ -451,6 +466,7 @@ class LimiterService : AccessibilityService() {
             packageName, "com.android.incallui", "com.android.server.telecom",
             "com.android.phone", "com.android.emergency", "com.samsung.android.incallui"
         )
+        s.addAll(scrExemptPkgs())   // kullanıcının kapsam dışı bıraktığı uygulamalar
         try { (getSystemService(Context.TELECOM_SERVICE) as TelecomManager).defaultDialerPackage?.let { s.add(it) } } catch (e: Exception) {}
         try { Telephony.Sms.getDefaultSmsPackage(this)?.let { s.add(it) } } catch (e: Exception) {}
         for (i in listOf(Intent(Intent.ACTION_DIAL, Uri.parse("tel:112")), Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:")))) {
