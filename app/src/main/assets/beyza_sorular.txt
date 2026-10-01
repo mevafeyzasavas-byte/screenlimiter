@@ -10,7 +10,7 @@ C. Elif, Mîm, Râ
 D. Dal, Zel, Ra
 Cevap: A
 
-2. Arapçada "صباح الخير" (Sabahul hayr) ifadesinin Türkçe anlamı nedir?
+2. Arapçada "صباح الخير" ifadesinin Türkçe anlamı nedir?
 A. İyi akşamlar
 B. Günaydın
 C. Teşekkür ederim
@@ -45,7 +45,7 @@ C. 15
 D. 10
 Cevap: D
 
-7. Ay'ın Dünya etrafındaki dolanma hareketi yaklaşık kaç günde tamamlanır?
+7. Ay'ın evrelerinin tekrarlanması (bir yeni aydan diğerine) yaklaşık kaç günde tamamlanır?
 A. 24 saat
 B. 365 gün
 C. Yaklaşık 29 buçuk gün
@@ -79,3 +79,1326 @@ B. Spor kulübü
 C. Mahalle derneği
 D. Aile
 Cevap: D
+
+12. İslam'ın şartları kaç tanedir?
+A. 3
+B. 4
+C. 5
+D. 6
+Cevap: C
+
+13. Hz. Muhammed (s.a.s.) hangi şehirde doğmuştur?
+A. Medine
+B. Mekke
+C. Kudüs
+D. Taif
+Cevap: B
+
+14. Kur'an-ı Kerim'in ilk inen ayetleri hangi sûrede yer alır?
+A. Fâtiha
+B. Alak
+C. İhlâs
+D. Nâs
+Cevap: B
+
+15. Hicrî takvimin başlangıcı olarak kabul edilen olay hangisidir?
+A. Hicret
+B. Vahyin başlaması
+C. Peygamberimizin doğumu
+D. Mekke'nin fethi
+Cevap: A
+
+16. Namaza başlarken söylenen "Allahü Ekber" tekbirine ne ad verilir?
+A. Selam
+B. İftitah tekbiri
+C. Kunut
+D. Tahiyyat
+Cevap: B
+
+17. Hanefi mezhebine göre abdestin farzları kaç tanedir?
+A. 2
+B. 3
+C. 5
+D. 4
+Cevap: D
+
+18. Arapçada "كتاب" sözcüğünün Türkçe anlamı nedir?
+A. Kitap
+B. Kalem
+C. Defter
+D. Masa
+Cevap: A
+
+19. Kur'an-ı Kerim kaç sûreden oluşur?
+A. 99
+B. 104
+C. 114
+D. 124
+Cevap: C
+
+20. Peygamberimizin annesinin adı aşağıdakilerden hangisidir?
+A. Hatice
+B. Fâtıma
+C. Halime
+D. Âmine
+Cevap: D
+
+21. Ramazan ayının sonunda, bayram namazından önce verilen sadakaya ne denir?
+A. Zekât
+B. Kurban
+C. Fitre
+D. Hac
+Cevap: C
+
+22. "Güzel" sözcüğünün zıt anlamlısı aşağıdakilerden hangisidir?
+A. Çirkin
+B. Hoş
+C. Tatlı
+D. Yakışıklı
+Cevap: A
+
+23. Aşağıdaki sözcüklerden hangisi bir eylemdir (fiil)?
+A. Masa
+B. Koşmak
+C. Kırmızı
+D. Okul
+Cevap: B
+
+24. 3/4 kesrinin ondalık gösterimi aşağıdakilerden hangisidir?
+A. 0,75
+B. 0,34
+C. 0,25
+D. 0,5
+Cevap: A
+
+25. 12 × 8 işleminin sonucu kaçtır?
+A. 84
+B. 96
+C. 92
+D. 108
+Cevap: B
+
+26. Kenar uzunlukları 8 cm ve 5 cm olan bir dikdörtgenin çevresi kaç cm'dir?
+A. 40
+B. 13
+C. 18
+D. 26
+Cevap: D
+
+27. Güneş Sistemi'nde Güneş'e en yakın gezegen hangisidir?
+A. Merkür
+B. Venüs
+C. Dünya
+D. Mars
+Cevap: A
+
+28. Su, deniz seviyesinde kaç °C'de kaynar?
+A. 50
+B. 90
+C. 100
+D. 120
+Cevap: C
+
+29. Yeşil bitkilerin güneş ışığıyla kendi besinini üretmesine ne ad verilir?
+A. Solunum
+B. Fotosentez
+C. Terleme
+D. Çimlenme
+Cevap: B
+
+30. Türkiye Cumhuriyeti'nin başkenti neresidir?
+A. İstanbul
+B. İzmir
+C. Bursa
+D. Ankara
+Cevap: D
+
+31. Cumhuriyet hangi tarihte ilan edilmiştir?
+A. 30 Ağustos 1922
+B. 23 Nisan 1920
+C. 29 Ekim 1923
+D. 19 Mayıs 1919
+Cevap: C
+
+32. Mustafa Kemal, Kurtuluş Savaşı'nı başlatmak için 19 Mayıs 1919'da hangi şehre çıkmıştır?
+A. Samsun
+B. İzmir
+C. Sivas
+D. Erzurum
+Cevap: A
+
+33. İstiklâl Marşı'nın şairi kimdir?
+A. Namık Kemal
+B. Mehmet Âkif Ersoy
+C. Ziya Gökalp
+D. Yahya Kemal
+Cevap: B
+
+34. "Which day comes after Monday?" sorusunun doğru cevabı aşağıdakilerden hangisidir?
+A. Sunday
+B. Friday
+C. Tuesday
+D. Saturday
+Cevap: C
+
+35. "I ___ a student." cümlesinde boşluğa hangisi gelmelidir?
+A. am
+B. is
+C. are
+D. be
+Cevap: A
+
+36. Kur'an-ı Kerim'i harflerin mahreç ve sıfatlarına uygun, güzel okuma ilmine ne denir?
+A. Tefsir
+B. Hadis
+C. Kelam
+D. Tecvid
+Cevap: D
+
+37. Peygamberimizin vefatından sonra ilk halife olan kişi kimdir?
+A. Hz. Ebû Bekir
+B. Hz. Ömer
+C. Hz. Osman
+D. Hz. Ali
+Cevap: A
+
+38. Hz. İbrahim ile oğlu Hz. İsmail'in birlikte yükselttiği ibadet mekânı aşağıdakilerden hangisidir?
+A. Mescid-i Aksâ
+B. Kâbe
+C. Mescid-i Nebevî
+D. Kubâ Mescidi
+Cevap: B
+
+39. Aşağıdakilerden hangisi beş vakit namazdan biri değildir?
+A. İkindi
+B. Yatsı
+C. Kuşluk
+D. Öğle
+Cevap: C
+
+40. Tufan'dan kurtulmak için Allah'ın emriyle gemi yapan peygamber kimdir?
+A. Hz. İbrahim
+B. Hz. Nuh
+C. Hz. Musa
+D. Hz. İsa
+Cevap: B
+
+41. "Elhamdülillah" sözünün anlamı aşağıdakilerden hangisidir?
+A. Hamd (övgü) Allah'a mahsustur.
+B. Allah en büyüktür.
+C. Allah'tan başka ilah yoktur.
+D. Allah'ın adıyla.
+Cevap: A
+
+42. Kur'an-ı Kerim'de "Bismillahirrahmanirrahim" ifadesinin anlamı aşağıdakilerden hangisidir?
+A. Rahman ve Rahim olan Allah'ın adıyla
+B. Allah'tan başka ilah yoktur
+C. Hamd Allah'a mahsustur
+D. Allah en büyüktür
+Cevap: A
+
+43. İslam'da günde beş vakit kılınan ibadete ne ad verilir?
+A. Oruç
+B. Zekât
+C. Namaz
+D. Hac
+Cevap: C
+
+44. Aşağıdakilerden hangisi Hz. Muhammed'in (s.a.s.) güzel ahlak özelliklerinden biridir?
+A. Yalan söylemek
+B. Güvenilir olmak
+C. Sözünden dönmek
+D. Başkalarını kırmak
+Cevap: B
+
+45. 144 sayısının karekökü kaçtır?
+A. 14
+B. 11
+C. 13
+D. 12
+Cevap: D
+
+46. Aşağıdakilerden hangisi katı hâlden sıvı hâle geçiş olayının adıdır?
+A. Donma
+B. Erime
+C. Buharlaşma
+D. Yoğuşma
+Cevap: B
+
+47. Türkiye sınırları içinde kalan en uzun nehir aşağıdakilerden hangisidir?
+A. Fırat
+B. Sakarya
+C. Kızılırmak
+D. Yeşilırmak
+Cevap: C
+
+48. "Kitap okumak bilgimizi artırır." cümlesinde yüklem hangisidir?
+A. Kitap
+B. okumak
+C. bilgimizi
+D. artırır
+Cevap: D
+
+49. "Red" sözcüğünün Türkçe karşılığı aşağıdakilerden hangisidir?
+A. Mavi
+B. Yeşil
+C. Sarı
+D. Kırmızı
+Cevap: D
+
+50. Kur'an-ı Kerim'in en uzun sûresi aşağıdakilerden hangisidir?
+A. Bakara
+B. Âl-i İmrân
+C. Nisâ
+D. Mâide
+Cevap: A
+
+51. İslam'ın ilk müezzini kimdir?
+A. Hz. Ömer
+B. Hz. Bilâl-i Habeşî
+C. Hz. Ali
+D. Hz. Osman
+Cevap: B
+
+52. Peygamberimizin ilk eşi aşağıdakilerden hangisidir?
+A. Hz. Âişe
+B. Hz. Hafsa
+C. Hz. Hatice
+D. Hz. Zeyneb
+Cevap: C
+
+53. Kur'an-ı Kerim'in son sûresi aşağıdakilerden hangisidir?
+A. Nâs
+B. Felak
+C. İhlâs
+D. Kevser
+Cevap: A
+
+54. Kurban Bayramı'nda yerine getirilen ibadet aşağıdakilerden hangisidir?
+A. Kurban kesmek
+B. Fitre vermek
+C. Teravih kılmak
+D. İftar yapmak
+Cevap: A
+
+55. Cuma namazının farzı kaç rekattır?
+A. 4
+B. 3
+C. 2
+D. 5
+Cevap: C
+
+56. Akşam namazının farzı kaç rekattır?
+A. 2
+B. 3
+C. 4
+D. 5
+Cevap: B
+
+57. Teyemmüm hangi durumda yapılır?
+A. Hava sıcak olduğunda
+B. Acele edildiğinde
+C. Namaza geç kalındığında
+D. Su bulunmadığında ya da kullanılamadığında
+Cevap: D
+
+58. Hz. Âdem'in eşi kimdir?
+A. Hz. Havva
+B. Hz. Sare
+C. Hz. Hacer
+D. Hz. Meryem
+Cevap: A
+
+59. Hz. Musa'ya indirilen kutsal kitap hangisidir?
+A. Zebur
+B. İncil
+C. Kur'an-ı Kerim
+D. Tevrat
+Cevap: D
+
+60. İncil hangi peygambere indirilmiştir?
+A. Hz. Musa
+B. Hz. İsa
+C. Hz. Davud
+D. Hz. Muhammed
+Cevap: B
+
+61. Zebur hangi peygambere indirilmiştir?
+A. Hz. Nuh
+B. Hz. Yusuf
+C. Hz. Davud
+D. Hz. Yunus
+Cevap: C
+
+62. Hz. Yunus'u denizde hangi canlı yutmuştur?
+A. Aslan
+B. Kurt
+C. Kartal
+D. Büyük bir balık
+Cevap: D
+
+63. Arapçada "مدرسة" sözcüğünün Türkçe anlamı nedir?
+A. Kitap
+B. Okul
+C. Ev
+D. Bahçe
+Cevap: B
+
+64. Arapçada "ماء" sözcüğünün Türkçe anlamı nedir?
+A. Süt
+B. Ekmek
+C. Su
+D. Çay
+Cevap: C
+
+65. Arapçada "شكرا" sözcüğünün Türkçe anlamı nedir?
+A. Teşekkürler
+B. Lütfen
+C. Özür dilerim
+D. Güle güle
+Cevap: A
+
+66. Arap alfabesinin ilk harfi aşağıdakilerden hangisidir?
+A. Ba
+B. Tâ
+C. Cim
+D. Elif
+Cevap: D
+
+67. Arap alfabesi kaç harften oluşur?
+A. 26
+B. 28
+C. 29
+D. 30
+Cevap: B
+
+68. "Cesur" sözcüğünün eş anlamlısı aşağıdakilerden hangisidir?
+A. Çekingen
+B. Tembel
+C. Yiğit
+D. Cimri
+Cevap: C
+
+69. Soru bildiren cümlelerin sonuna hangi noktalama işareti konur?
+A. Soru işareti
+B. Nokta
+C. Virgül
+D. Ünlem
+Cevap: A
+
+70. "Damlaya damlaya göl olur." atasözü neyi anlatır?
+A. Yağmurun faydalarını
+B. Küçük birikimlerin zamanla büyük olacağını
+C. Göllerin nasıl oluştuğunu
+D. Suyun israf edilmemesi gerektiğini
+Cevap: B
+
+71. 7 × 9 işleminin sonucu kaçtır?
+A. 56
+B. 72
+C. 63
+D. 54
+Cevap: C
+
+72. 1000 − 275 işleminin sonucu kaçtır?
+A. 735
+B. 825
+C. 625
+D. 725
+Cevap: D
+
+73. 3/5 + 1/5 işleminin sonucu kaçtır?
+A. 4/5
+B. 4/10
+C. 3/10
+D. 2/5
+Cevap: A
+
+74. Bir kenarı 6 cm olan karenin çevresi kaç cm'dir?
+A. 12
+B. 24
+C. 36
+D. 18
+Cevap: B
+
+75. 2,5 + 1,75 işleminin sonucu kaçtır?
+A. 3,25
+B. 4,75
+C. 4,25
+D. 3,75
+Cevap: C
+
+76. Aşağıdaki sayılardan hangisi asal sayıdır?
+A. 9
+B. 15
+C. 21
+D. 7
+Cevap: D
+
+77. 100 ÷ 4 işleminin sonucu kaçtır?
+A. 25
+B. 20
+C. 40
+D. 50
+Cevap: A
+
+78. Dünya'nın tek doğal uydusu aşağıdakilerden hangisidir?
+A. Mars
+B. Ay
+C. Güneş
+D. Venüs
+Cevap: B
+
+79. Aşağıdakilerden hangisi kendi ışığını yayan bir gök cismidir?
+A. Ay
+B. Ayna
+C. Güneş
+D. Dünya
+Cevap: C
+
+80. Aşağıdakilerden hangisi gaz hâlindeki bir maddedir?
+A. Buz
+B. Su
+C. Taş
+D. Su buharı
+Cevap: D
+
+81. Mıknatıs aşağıdaki maddelerden hangisini çeker?
+A. Demir
+B. Plastik
+C. Cam
+D. Tahta
+Cevap: A
+
+82. Besin zincirinde üretici konumunda olan canlı aşağıdakilerden hangisidir?
+A. Aslan
+B. Yeşil bitki
+C. Kurt
+D. Kartal
+Cevap: B
+
+83. Kalbin vücuttaki görevi nedir?
+A. Besinleri sindirmek
+B. Havayı temizlemek
+C. Kanı vücuda pompalamak
+D. Düşünmek
+Cevap: C
+
+84. Mustafa Kemal Atatürk hangi şehirde doğmuştur?
+A. İzmir
+B. Manastır
+C. Samsun
+D. Selanik
+Cevap: D
+
+85. Aşağıdaki ülkelerden hangisi Türkiye'nin komşusu değildir?
+A. Mısır
+B. Bulgaristan
+C. Irak
+D. Gürcistan
+Cevap: A
+
+86. Türkiye'nin en büyük gölü aşağıdakilerden hangisidir?
+A. Tuz Gölü
+B. Van Gölü
+C. Eğirdir Gölü
+D. Beyşehir Gölü
+Cevap: B
+
+87. Türkiye'nin en yüksek dağı aşağıdakilerden hangisidir?
+A. Erciyes
+B. Uludağ
+C. Ağrı Dağı
+D. Kaçkar Dağı
+Cevap: C
+
+88. Türkiye Cumhuriyeti'nin ilk Cumhurbaşkanı kimdir?
+A. İsmet İnönü
+B. Celal Bayar
+C. Cemal Gürsel
+D. Mustafa Kemal Atatürk
+Cevap: D
+
+89. TBMM'nin açıldığı 23 Nisan 1920 tarihi hangi bayram olarak kutlanır?
+A. 23 Nisan Ulusal Egemenlik ve Çocuk Bayramı
+B. Zafer Bayramı
+C. Cumhuriyet Bayramı
+D. Gençlik ve Spor Bayramı
+Cevap: A
+
+90. 30 Ağustos hangi bayram olarak kutlanır?
+A. Cumhuriyet Bayramı
+B. Zafer Bayramı
+C. Gençlik ve Spor Bayramı
+D. Çocuk Bayramı
+Cevap: B
+
+91. İngilizce "Blue" sözcüğünün Türkçe karşılığı nedir?
+A. Kırmızı
+B. Yeşil
+C. Mavi
+D. Sarı
+Cevap: C
+
+92. İngilizce "Cat" sözcüğünün Türkçe karşılığı nedir?
+A. Köpek
+B. Kuş
+C. Balık
+D. Kedi
+Cevap: D
+
+93. "How are you?" sorusuna aşağıdakilerden hangisi uygun bir cevaptır?
+A. I am ten years old.
+B. I am fine, thank you.
+C. It is a book.
+D. She is my mother.
+Cevap: B
+
+94. İngilizce "Seven" sayısı aşağıdakilerden hangisidir?
+A. 7
+B. 6
+C. 8
+D. 9
+Cevap: A
+
+95. İngilizce "Book" sözcüğünün Türkçe karşılığı nedir?
+A. Kalem
+B. Defter
+C. Kitap
+D. Silgi
+Cevap: C
+
+96. Kâbe hangi şehirde bulunur?
+A. Medine
+B. Mekke
+C. Şam
+D. Kudüs
+Cevap: B
+
+97. Mal varlığı belirli miktara ulaşan Müslümanların yoksullara vermesi gereken ibadet hangisidir?
+A. Zekât
+B. Fitre
+C. Kurban
+D. Hac
+Cevap: A
+
+98. Ramazan ayına özel olarak yatsı namazından sonra kılınan namaz hangisidir?
+A. Cuma
+B. Cenaze
+C. Bayram
+D. Teravih
+Cevap: D
+
+99. Müslümanların oruç tuttuğu ay hangisidir?
+A. Muharrem
+B. Recep
+C. Ramazan
+D. Şaban
+Cevap: C
+
+100. İslam'ın birinci şartı aşağıdakilerden hangisidir?
+A. Namaz
+B. Kelime-i şehadet
+C. Oruç
+D. Hac
+Cevap: B
+
+101. Arapça hangi yönde yazılır?
+A. Soldan sağa
+B. Yukarıdan aşağıya
+C. Sağdan sola
+D. Aşağıdan yukarıya
+Cevap: C
+
+102. Arapçada üstün harekesinin adı aşağıdakilerden hangisidir?
+A. Kesre
+B. Fetha
+C. Damme
+D. Sükûn
+Cevap: B
+
+103. Arapçada harfin altına konan ve "i" sesi veren hareke hangisidir?
+A. Fetha
+B. Damme
+C. Şedde
+D. Kesre
+Cevap: D
+
+104. Arapçada harfin üstüne konan ve "u/ü" sesi veren hareke hangisidir?
+A. Damme
+B. Fetha
+C. Kesre
+D. Sükûn
+Cevap: A
+
+105. Sükûn işareti aşağıdakilerden hangisini ifade eder?
+A. Harfin uzatılarak okunacağını
+B. Harfin iki kez okunacağını
+C. Harfin okunmayacağını
+D. Harfin harekesiz, sakin okunacağını
+Cevap: D
+
+106. Şedde işareti, harfin nasıl okunacağını gösterir?
+A. Çift okunacağını
+B. Uzatılacağını
+C. Sakin okunacağını
+D. Okunmayacağını
+Cevap: A
+
+107. Aşağıdaki harflerden hangisi kendinden sonraki harfe bitişmez?
+A. Ba
+B. Elif
+C. Cim
+D. Sin
+Cevap: B
+
+108. Arapçada "أب" sözcüğünün Türkçe anlamı nedir?
+A. Anne
+B. Kardeş
+C. Dede
+D. Baba
+Cevap: D
+
+109. Arapçada "أم" sözcüğünün Türkçe anlamı nedir?
+A. Anne
+B. Baba
+C. Abla
+D. Teyze
+Cevap: A
+
+110. Arapçada "بيت" sözcüğünün Türkçe anlamı nedir?
+A. Okul
+B. Bahçe
+C. Ev
+D. Cami
+Cevap: C
+
+111. Arapçada "باب" sözcüğünün Türkçe anlamı nedir?
+A. Pencere
+B. Kapı
+C. Duvar
+D. Çatı
+Cevap: B
+
+112. Arapçada "ولد" sözcüğünün Türkçe anlamı nedir?
+A. Kız çocuğu
+B. Öğretmen
+C. Erkek çocuğu
+D. Misafir
+Cevap: C
+
+113. Arapçada "بنت" sözcüğünün Türkçe anlamı nedir?
+A. Erkek çocuğu
+B. Kız çocuğu
+C. Anne
+D. Komşu
+Cevap: B
+
+114. Arapçada "أحمر" sözcüğü hangi rengi ifade eder?
+A. Mavi
+B. Sarı
+C. Yeşil
+D. Kırmızı
+Cevap: D
+
+115. Arapçada "أبيض" sözcüğü hangi rengi ifade eder?
+A. Beyaz
+B. Siyah
+C. Mavi
+D. Turuncu
+Cevap: A
+
+116. Arapçada "أزرق" sözcüğü hangi rengi ifade eder?
+A. Kırmızı
+B. Beyaz
+C. Mavi
+D. Pembe
+Cevap: C
+
+117. Arapçada "واحد" sayısı kaçı ifade eder?
+A. 1
+B. 2
+C. 3
+D. 10
+Cevap: A
+
+118. Arapçada "ثلاثة" sayısı kaçı ifade eder?
+A. 2
+B. 5
+C. 4
+D. 3
+Cevap: D
+
+119. Arapçada "عشرة" sayısı kaçı ifade eder?
+A. 10
+B. 8
+C. 6
+D. 20
+Cevap: A
+
+120. "مرحبا" ifadesinin Türkçe karşılığı nedir?
+A. Güle güle
+B. Merhaba
+C. Teşekkürler
+D. Özür dilerim
+Cevap: B
+
+121. "السلام عليكم" diyen birine verilen cevap aşağıdakilerden hangisidir?
+A. صباح الخير (Sabâhul hayr)
+B. مع السلامة (Maas-selâme)
+C. وعليكم السلام (Ve aleykümüsselâm)
+D. شكرا (Şükran)
+Cevap: C
+
+122. "مع السلامة" ifadesi hangi durumda söylenir?
+A. Sabah karşılaşınca
+B. Yemekten önce
+C. Hediye alınca
+D. Vedalaşırken
+Cevap: D
+
+123. "كيف حالك" sorusunun Türkçe anlamı nedir?
+A. Nasılsın?
+B. Adın nedir?
+C. Nerelisin?
+D. Kaç yaşındasın?
+Cevap: A
+
+124. "ما اسمك" sorusunun Türkçe anlamı nedir?
+A. Nasılsın?
+B. Adın nedir?
+C. Bu nedir?
+D. Neredesin?
+Cevap: B
+
+125. "الجمعة" hangi günün Arapça adıdır?
+A. Pazartesi
+B. Cumartesi
+C. Pazar
+D. Cuma
+Cevap: D
+
+126. Kur'an-ı Kerim hangi dilde indirilmiştir?
+A. Türkçe
+B. İbranice
+C. Arapça
+D. Farsça
+Cevap: C
+
+127. Kur'an-ı Kerim yaklaşık kaç yılda indirilmiştir?
+A. 3 yıl
+B. 10 yıl
+C. 40 yıl
+D. 23 yıl
+Cevap: D
+
+128. Kur'an-ı Kerim'in ilk ayetleri hangi mağarada inmiştir?
+A. Hira Mağarası
+B. Sevr Mağarası
+C. Ashab-ı Kehf Mağarası
+D. Cudi Mağarası
+Cevap: A
+
+129. Kur'an-ı Kerim'in ilk inen ayetinin ilk emri aşağıdakilerden hangisidir?
+A. Namaz kıl
+B. Oku
+C. Oruç tut
+D. Yaz
+Cevap: B
+
+130. Kur'an-ı Kerim kaç cüzden oluşur?
+A. 20
+B. 25
+C. 30
+D. 40
+Cevap: C
+
+131. Fâtiha sûresi kaç ayettir?
+A. 7
+B. 5
+C. 4
+D. 10
+Cevap: A
+
+132. Mushaftaki sıralamaya göre Kur'an-ı Kerim'in ilk sûresi hangisidir?
+A. Bakara
+B. İhlâs
+C. Nâs
+D. Fâtiha
+Cevap: D
+
+133. İhlâs sûresi kaç ayettir?
+A. 3
+B. 4
+C. 5
+D. 6
+Cevap: B
+
+134. Kevser sûresi kaç ayettir?
+A. 7
+B. 5
+C. 3
+D. 10
+Cevap: C
+
+135. Kur'an-ı Kerim'in en uzun sûresi olan Bakara sûresi kaç ayettir?
+A. 114
+B. 200
+C. 250
+D. 286
+Cevap: D
+
+136. Ayetü'l-Kürsî hangi sûrede yer alır?
+A. Bakara
+B. Fâtiha
+C. İhlâs
+D. Felak
+Cevap: A
+
+137. Kur'an-ı Kerim'i baştan sona ezbere bilen kişiye ne ad verilir?
+A. Müezzin
+B. Hâfız
+C. İmam
+D. Vaiz
+Cevap: B
+
+138. Kur'an-ı Kerim'in mushaf hâlinde çoğaltılıp çeşitli bölgelere gönderilmesi hangi halife zamanında olmuştur?
+A. Hz. Ebû Bekir
+B. Hz. Ömer
+C. Hz. Osman
+D. Hz. Ali
+Cevap: C
+
+139. Kur'an-ı Kerim'in her bir cümlesine ne ad verilir?
+A. Sûre
+B. Cüz
+C. Hizb
+D. Ayet
+Cevap: D
+
+140. Kur'an-ı Kerim'in kitap hâline getirilmiş yazılı nüshasına ne ad verilir?
+A. Mushaf
+B. Sahife
+C. Hadis
+D. Levha
+Cevap: A
+
+141. Kur'an-ı Kerim okumaya başlarken okunan "Eûzü billâhi mineşşeytânirracîm" sözünün anlamı aşağıdakilerden hangisidir?
+A. Hamd Allah'a mahsustur
+B. Kovulmuş şeytanın şerrinden Allah'a sığınırım
+C. Allah'ın adıyla
+D. Allah en büyüktür
+Cevap: B
+
+142. Kur'an-ı Kerim'in indirilmeye başlandığı mübarek gece hangisidir?
+A. Regaib Gecesi
+B. Mevlid Gecesi
+C. Kadir Gecesi
+D. Miraç Gecesi
+Cevap: C
+
+143. Kadir sûresi kaç ayettir?
+A. 3
+B. 4
+C. 6
+D. 5
+Cevap: D
+
+144. Nâs sûresi kaç ayettir?
+A. 6
+B. 5
+C. 4
+D. 3
+Cevap: A
+
+145. Felak sûresi kaç ayettir?
+A. 4
+B. 5
+C. 6
+D. 7
+Cevap: B
+
+146. Fîl sûresinde aşağıdaki olaylardan hangisi anlatılır?
+A. Tufan'ın başlaması
+B. Hz. Yusuf'un kuyuya atılması
+C. Ebrehe'nin fil ordusuyla Kâbe'yi yıkmaya gelmesi
+D. Hz. İbrahim'in ateşe atılması
+Cevap: C
+
+147. Kur'an-ı Kerim'i okumaya ne ad verilir?
+A. Tefsir
+B. Hıfz
+C. Meal
+D. Tilavet
+Cevap: D
+
+148. Kur'an-ı Kerim okunurken dinleyen kişinin nasıl davranması gerekir?
+A. Sessiz ve saygılı olmalıdır
+B. Yüksek sesle konuşmalıdır
+C. Başka işlerle ilgilenmelidir
+D. Oradan uzaklaşmalıdır
+Cevap: A
+
+149. Hicretten önce Mekke'de inen sûrelere ne ad verilir?
+A. Medenî sûreler
+B. Mekkî sûreler
+C. Kısa sûreler
+D. Uzun sûreler
+Cevap: B
+
+150. Hicretten sonra Medine'de inen sûrelere ne ad verilir?
+A. Mekkî sûreler
+B. Hafif sûreler
+C. Medenî sûreler
+D. Ağır sûreler
+Cevap: C
+
+151. İslam'ın şartlarından olan "kelime-i şehadet"in anlamı aşağıdakilerden hangisidir?
+A. Allah'tan başka ilah olmadığına ve Hz. Muhammed'in Allah'ın elçisi olduğuna şahitlik etmek
+B. Her gün beş vakit namaz kılmak
+C. Ramazan ayında oruç tutmak
+D. Gücü yeten kişinin hacca gitmesi
+Cevap: A
+
+152. İmanın şartları kaç tanedir?
+A. 5
+B. 6
+C. 4
+D. 7
+Cevap: B
+
+153. Aşağıdakilerden hangisi imanın şartlarından biri değildir?
+A. Meleklere iman
+B. Ahirete iman
+C. Kitaplara iman
+D. Hacca iman
+Cevap: D
+
+154. Allah'ın isimlerine ve sıfatlarına ne ad verilir?
+A. Esmâ-ül Hüsnâ
+B. Salavat
+C. Tekbir
+D. Tehlil
+Cevap: A
+
+155. Esmâ-ül Hüsnâ'da kaç isim bulunduğu rivayet edilir?
+A. 33
+B. 66
+C. 99
+D. 100
+Cevap: C
+
+156. Allah'ın "er-Rahman" ismi hangi anlamı taşır?
+A. Dünyada bütün canlılara merhamet eden
+B. Her şeyi bilen
+C. Her şeyi gören
+D. Her şeye gücü yeten
+Cevap: A
+
+157. Peygamberimize ilk vahiy geldiğinde kaç yaşındaydı?
+A. 25
+B. 30
+C. 63
+D. 40
+Cevap: D
+
+158. Peygamberimizin hicret ettiği şehir aşağıdakilerden hangisidir?
+A. Medine
+B. Taif
+C. Kudüs
+D. Şam
+Cevap: A
+
+159. Peygamberimizin hicret yolculuğunda yol arkadaşı kimdir?
+A. Hz. Ömer
+B. Hz. Ali
+C. Hz. Osman
+D. Hz. Ebû Bekir
+Cevap: D
+
+160. Peygamberimize "el-Emîn" lakabı verilmiştir. Bu lakabın anlamı nedir?
+A. Güvenilir
+B. Cömert
+C. Cesur
+D. Âlim
+Cevap: A
+
+161. Peygamberimizin amcası olup ona Mekke'de büyük destek veren kişi kimdir?
+A. Ebû Cehil
+B. Ebû Leheb
+C. Ebû Tâlib
+D. Ebû Süfyan
+Cevap: C
+
+162. Peygamberimizin doğduğu yıl Mekke'de hangi olay yaşanmıştır?
+A. Hicret
+B. Fil Olayı
+C. Mekke'nin fethi
+D. Bedir Savaşı
+Cevap: B
+
+163. Peygamberimizin doğum günü ve haftası ülkemizde ne olarak kutlanır?
+A. Kadir Gecesi
+B. Berat Kandili
+C. Mevlid Kandili ve Kutlu Doğum Haftası
+D. Miraç Kandili
+Cevap: C
+
+164. İslam tarihinde Mekke'nin fethi hangi yıl gerçekleşmiştir?
+A. Hicretin 2. yılı
+B. Hicretin 5. yılı
+C. Hicretin 8. yılı
+D. Hicretin 10. yılı
+Cevap: C
+
+165. Peygamberimizin vefat ettiği şehir neresidir?
+A. Mekke
+B. Medine
+C. Taif
+D. Kudüs
+Cevap: B
+
+166. Aşağıdakilerden hangisi dört büyük melekten biri değildir?
+A. Cebrail
+B. Mikail
+C. Münker
+D. İsrafil
+Cevap: C
+
+167. Kıyamet günü sûra üfleyecek olan melek kimdir?
+A. Cebrail
+B. Mikail
+C. Azrail
+D. İsrafil
+Cevap: D
+
+168. Rızıkların ve yağmurun dağıtımıyla görevli melek kimdir?
+A. Mikail
+B. Cebrail
+C. İsrafil
+D. Azrail
+Cevap: A
+
+169. Ölümle görevli olan melek kimdir?
+A. Mikail
+B. İsrafil
+C. Azrail
+D. Cebrail
+Cevap: C
+
+170. Hz. İbrahim'in lakabı aşağıdakilerden hangisidir?
+A. Kelîmullah
+B. Halîlullah
+C. Safiyyullah
+D. Rûhullah
+Cevap: B
+
+171. Hz. Musa'nın lakabı aşağıdakilerden hangisidir?
+A. Halîlullah
+B. Kelîmullah
+C. Rûhullah
+D. Habîbullah
+Cevap: B
+
+172. Hz. Muhammed'in (s.a.s.) lakabı aşağıdakilerden hangisidir?
+A. Safiyyullah
+B. Rûhullah
+C. Halîlullah
+D. Habîbullah
+Cevap: D
+
+173. Hz. İsa'nın annesi kimdir?
+A. Hz. Meryem
+B. Hz. Hacer
+C. Hz. Sare
+D. Hz. Âsiye
+Cevap: A
+
+174. Bize kötü söz söyleyenlere karşı nasıl davranmamız İslam ahlakına daha uygundur?
+A. Aynı şekilde karşılık vermek
+B. Güzellikle davranmak
+C. Onlarla konuşmamak
+D. Onları kırmak
+Cevap: B
+
+175. Aşağıdakilerden hangisi komşuluk hakkına uygun bir davranıştır?
+A. Komşunun hâlini hatırını sormak
+B. Komşuyu rahatsız edecek gürültü yapmak
+C. Komşuyla küs durmak
+D. Komşunun eşyasına zarar vermek
+Cevap: A
+
+176. Aşağıdakilerden hangisi abdesti bozan durumlardan biridir?
+A. Yemek yemek
+B. Uyumak
+C. Su içmek
+D. Konuşmak
+Cevap: B
+
+177. Ezan ve kametin ortak amacı aşağıdakilerden hangisidir?
+A. Namaz vaktini ve namaza başlanacağını bildirmek
+B. Oruç vaktini bildirmek
+C. Kurban kesim zamanını bildirmek
+D. Zekât vaktini bildirmek
+Cevap: A
+
+178. Cami cemaatine namaz kıldıran görevliye ne denir?
+A. Müezzin
+B. İmam
+C. Hâfız
+D. Vaiz
+Cevap: B
+
+179. Ezan okuyan görevliye ne denir?
+A. İmam
+B. Vaiz
+C. Müezzin
+D. Müftü
+Cevap: C
+
+180. Kâbe'yi ziyaret edip belirli ibadetleri yerine getirmeye ne ad verilir?
+A. Umre
+B. Hac
+C. Zekât
+D. Kurban
+Cevap: B
+
+181. Hac ibadeti hangi ayda yapılır?
+A. Zilhicce
+B. Ramazan
+C. Muharrem
+D. Şevval
+Cevap: A
+
+182. Ramazan Bayramı hangi ayın başında kutlanır?
+A. Zilhicce
+B. Şevval
+C. Ramazan
+D. Recep
+Cevap: B
+
+183. Oruç tutan kişinin gün boyunca kaçınması gereken şeylerden biri aşağıdakilerden hangisidir?
+A. Yürüyüş yapmak
+B. Kitap okumak
+C. Yemek yemek ve su içmek
+D. Konuşmak
+Cevap: C
+
+184. Sabah ezanından önce yapılan yemeğe ne denir?
+A. İftar
+B. Sahur
+C. Kahvaltı
+D. Ziyafet
+Cevap: B
+
+185. Akşam ezanı okununca orucun açılmasına ne denir?
+A. Sahur
+B. Teravih
+C. İftar
+D. İtikâf
+Cevap: C
+
+186. Aşağıdakilerden hangisi yetim ve yoksullara yardım etmeyle ilgili bir davranıştır?
+A. Onları görmezden gelmek
+B. Onlarla alay etmek
+C. Onlara sadaka vermek ve yardım etmek
+D. Onlardan uzak durmak
+Cevap: C
+
+187. Din kültürü derslerinde "ahlak" kavramı en doğru şekilde nasıl tanımlanır?
+A. Sadece okuldaki kurallar
+B. İyi ve doğru davranışların bütünü
+C. Yalnızca dinî ibadetler
+D. Kıyafet seçimi
+Cevap: B
+
+188. "Sadaka" kavramı aşağıdakilerden hangisini ifade eder?
+A. Allah rızası için karşılık beklemeden verilen yardım
+B. Bayramda yapılan ziyaret
+C. Kur'an-ı Kerim okumak
+D. Namaz öncesi yapılan temizlik
+Cevap: A
+
+189. Allah'ın verdiği nimetlere karşı teşekkür etmeye ne ad verilir?
+A. Sabır
+B. Tövbe
+C. Şükür
+D. Tevekkül
+Cevap: C
+
+190. Zorluklar karşısında sabırlı olmak ve Allah'a güvenmek aşağıdakilerden hangisiyle ilgilidir?
+A. Tevekkül ve sabır
+B. İsraf
+C. Kibir
+D. Gıybet
+Cevap: A
+
+191. Birinin arkasından, kendisi duysa hoşlanmayacağı şeyleri söylemeye ne ad verilir?
+A. Şükür
+B. Dua
+C. Tövbe
+D. Gıybet
+Cevap: D
+
+192. Hz. Muhammed'in (s.a.s.) vefatından sonra gelen ikinci halife kimdir?
+A. Hz. Ebû Bekir
+B. Hz. Ömer
+C. Hz. Osman
+D. Hz. Ali
+Cevap: B
+
+193. Aşağıdakilerden hangisi Hulefâ-yi Râşidîn'den (dört büyük halife) biri değildir?
+A. Hz. Ebû Bekir
+B. Hz. Ömer
+C. Hz. Muâviye
+D. Hz. Ali
+Cevap: C
+
+194. Zekât verilmesi gereken kişilere ne denir?
+A. Müezzin
+B. Fakir ve muhtaç kimseler
+C. Hâfızlar
+D. Misafirler
+Cevap: B
+
+195. İslam'da temizliğin önemini anlatan "Temizlik imanın yarısıdır" sözü aşağıdakilerden hangisini ifade eder?
+A. Hem beden hem çevre temizliğinin önemini
+B. Sadece beden temizliğinin önemini
+C. Sadece elbise temizliğinin önemini
+D. Sadece cami temizliğinin önemini
+Cevap: A
+
+196. Müslümanların kıble olarak yöneldikleri yer neresidir?
+A. Mescid-i Aksâ
+B. Mescid-i Nebevî
+C. Kâbe
+D. Hira Mağarası
+Cevap: C
+
+197. Namazda yüzü yöneltilen yöne ne ad verilir?
+A. Mihrap
+B. Kıble
+C. Minber
+D. Minare
+Cevap: B
+
+198. İmamın cemaate hitap ettiği camideki yüksek yere ne denir?
+A. Mihrap
+B. Kürsü
+C. Şadırvan
+D. Minber
+Cevap: D
+
+199. Camilerde abdest almak için kullanılan yere ne ad verilir?
+A. Şadırvan
+B. Mihrap
+C. Minber
+D. Kürsü
+Cevap: A
+
+200. İslam dininde "helal" kavramı neyi ifade eder?
+A. Yapılması yasak olan
+B. Yapılması dinen serbest ve uygun olan
+C. Sadece yenilen yiyecekler
+D. Sadece bayramda yapılan davranışlar
+Cevap: B
