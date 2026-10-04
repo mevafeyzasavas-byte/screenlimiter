@@ -1218,7 +1218,7 @@ class LimiterService : AccessibilityService() {
     private var lastGuardTrigger = 0L
 
     private fun isSensitive(pkg: String): Boolean =
-        pkg != packageName && SENSITIVE_HINTS.any { pkg.contains(it) }
+        pkg != packageName && (pkg == "android" || SENSITIVE_HINTS.any { pkg.contains(it) })
 
     private fun isLauncher(pkg: String): Boolean =
         pkg.contains("launcher") || pkg.contains("miui.home")
@@ -1241,6 +1241,7 @@ class LimiterService : AccessibilityService() {
 
         val texts = ArrayList<String>()
         collectTexts(root, texts, 0)
+        if (texts.any { it.contains(LABEL) }) dumpGuard(pkg, texts)
         if (!isProtectedScreen(pkg, texts)) return
 
         lastGuardTrigger = SystemClock.elapsedRealtime()
@@ -1251,6 +1252,19 @@ class LimiterService : AccessibilityService() {
                 .putExtra("guard", true)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         )
+    }
+
+    // Tanı: Screen Limiter adının geçtiği hassas ekranların paket + metinlerini kaydeder
+    // (Android/data/com.meva.applimiter/files/guard_log.txt, son 30 kayıt)
+    private fun dumpGuard(pkg: String, texts: List<String>) {
+        try {
+            val f = java.io.File(getExternalFilesDir(null), "guard_log.txt")
+            val old = if (f.exists()) f.readText().split("\n=====\n") else emptyList()
+            val entry = java.text.SimpleDateFormat("HH:mm:ss", Locale.US).format(java.util.Date()) +
+                " | " + pkg + "\n" + texts.distinct().take(40).joinToString(" | ")
+            f.writeText((old + entry).takeLast(30).joinToString("\n=====\n"))
+        } catch (_: Exception) {
+        }
     }
 
     private fun collectTexts(node: AccessibilityNodeInfo?, out: MutableList<String>, depth: Int) {
@@ -1289,8 +1303,14 @@ class LimiterService : AccessibilityService() {
 
         // 4) Ayarlar / uygulama bilgisi: başlıkta TAM olarak bizim adımız olmalı (başka uygulamanın
         //    sayfasında ya da uygulama listesinde değil) ve ekranda tehlikeli bir DÜĞME olmalı.
-        if (texts.none { it == LABEL }) return false
-        return texts.any { it in DANGER_BUTTONS }
+        //    EMUI'de "Sil"e basınca çıkan "yöneticiliği kapatıp sil" penceresinde başlık olmayabilir;
+        //    bu yüzden ad ekranın herhangi bir metninde geçsin yeter (serbest eşleşme).
+        if (texts.none { it.contains(LABEL) }) return false
+        //    Cihaz yöneticisi ETKİNLEŞTİRME sayfası serbest: kullanıcı korumayı açabilmeli.
+        if (texts.any { it == "etkinleştir" || it == "activate" }) return false
+        // Uygulama bilgisi sayfasında ad tam başlık ise, sayfanın kendisi korumalı sayılır
+        // (bu sayfada Sil / Kaldır / Zorla durdur düğmeleri bulunur).
+        return texts.any { it in DANGER_BUTTONS || DANGER_CONTAINS.any { d -> it.contains(d) } }
     }
 
     private fun toast(msg: String) {
@@ -1308,7 +1328,7 @@ class LimiterService : AccessibilityService() {
         private val SENSITIVE_HINTS = listOf(
             "settings", "packageinstaller", "permissioncontroller", "securitycenter",
             "safecenter", "systemmanager", "appmanager", "iqoo.secure", "appdetail",
-            "launcher", "miui.home"
+            "launcher", "miui.home", "huawei", "honor"
         )
         private val DANGER_EXACT = setOf("sil", "delete", "remove", "kapat", "disable", "turn off")
             .map { norm(it) }.toSet()
@@ -1319,7 +1339,8 @@ class LimiterService : AccessibilityService() {
         ).map { norm(it) }).toSet()
         private val DANGER_CONTAINS = listOf(
             "kaldır", "uninstall", "zorla durdur", "durmaya zorla", "force stop",
-            "devre dışı", "deactivate", "etkisizleştir"
+            "devre dışı", "deactivate", "etkisizleştir",
+            "silmek", "silinsin", "silinecek", "silin", "yönetici"
         ).map { norm(it) }
     }
 
