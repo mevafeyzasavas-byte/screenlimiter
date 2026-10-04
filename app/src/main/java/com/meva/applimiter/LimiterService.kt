@@ -1229,29 +1229,44 @@ class LimiterService : AccessibilityService() {
         handler.postDelayed({
             guardPending = false
             guardScan()
-        }, 600)
+        }, 250)
     }
+
+    private var labelSeenAt = 0L
 
     private fun guardScan() {
         if (System.currentTimeMillis() < prefs.getLong("grace_until", 0L)) return
-        if (SystemClock.elapsedRealtime() - lastGuardTrigger < 3000) return
-        val root = rootInActiveWindow ?: return
-        val pkg = root.packageName?.toString() ?: return
-        if (!isSensitive(pkg)) return
+        if (SystemClock.elapsedRealtime() - lastGuardTrigger < 1500) return
 
-        val texts = ArrayList<String>()
-        collectTexts(root, texts, 0)
-        if (texts.any { it.contains(LABEL) }) dumpGuard(pkg, texts)
-        if (!isProtectedScreen(pkg, texts)) return
+        // Etkin pencere + ekrandaki tüm pencereler (Huawei'nin "sil" onay penceresi ayrı pencere olabilir)
+        val roots = ArrayList<AccessibilityNodeInfo>()
+        try {
+            for (w in windows) w.root?.let { roots.add(it) }
+        } catch (_: Exception) {
+        }
+        rootInActiveWindow?.let { roots.add(it) }
 
-        lastGuardTrigger = SystemClock.elapsedRealtime()
-        performGlobalAction(GLOBAL_ACTION_HOME)
-        toast("Korumalı işlem. Şifre gerekli.")
-        startActivity(
-            Intent(this, MainActivity::class.java)
-                .putExtra("guard", true)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        )
+        for (root in roots) {
+            val pkg = root.packageName?.toString() ?: continue
+            if (!isSensitive(pkg)) continue
+            val texts = ArrayList<String>()
+            collectTexts(root, texts, 0)
+            if (texts.any { it.contains(LABEL) }) {
+                labelSeenAt = SystemClock.elapsedRealtime()
+                dumpGuard(pkg, texts)
+            }
+            if (!isProtectedScreen(pkg, texts)) continue
+
+            lastGuardTrigger = SystemClock.elapsedRealtime()
+            performGlobalAction(GLOBAL_ACTION_HOME)
+            toast("Korumalı işlem. Şifre gerekli.")
+            startActivity(
+                Intent(this, MainActivity::class.java)
+                    .putExtra("guard", true)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            )
+            return
+        }
     }
 
     // Tanı: Screen Limiter adının geçtiği hassas ekranların paket + metinlerini kaydeder
@@ -1303,14 +1318,17 @@ class LimiterService : AccessibilityService() {
 
         // 4) Ayarlar / uygulama bilgisi: başlıkta TAM olarak bizim adımız olmalı (başka uygulamanın
         //    sayfasında ya da uygulama listesinde değil) ve ekranda tehlikeli bir DÜĞME olmalı.
-        //    EMUI'de "Sil"e basınca çıkan "yöneticiliği kapatıp sil" penceresinde başlık olmayabilir;
-        //    bu yüzden ad ekranın herhangi bir metninde geçsin yeter (serbest eşleşme).
-        if (texts.none { it.contains(LABEL) }) return false
+        //    KATI MOD (Huawei/EMUI): ad ekranda herhangi bir metinde geçiyorsa ekran korumalıdır
+        //    (Uygulama bilgileri, sil/kaldır onayı, yönetici kapatma...). Danger kelimesi aranmaz.
         //    Cihaz yöneticisi ETKİNLEŞTİRME sayfası serbest: kullanıcı korumayı açabilmeli.
         if (texts.any { it == "etkinleştir" || it == "activate" }) return false
-        // Uygulama bilgisi sayfasında ad tam başlık ise, sayfanın kendisi korumalı sayılır
-        // (bu sayfada Sil / Kaldır / Zorla durdur düğmeleri bulunur).
-        return texts.any { it in DANGER_BUTTONS || DANGER_CONTAINS.any { d -> it.contains(d) } }
+        if (texts.any { it.contains(LABEL) }) return true
+
+        //    Adı geçmeyen onay penceresi: kısa süre önce Screen Limiter ekranı görüldüyse ve bu
+        //    pencerede silme/kaldırma/yönetici kapatma ifadesi varsa o da korumalıdır.
+        if (SystemClock.elapsedRealtime() - labelSeenAt < 20_000L &&
+            texts.any { t -> DANGER_CONTAINS.any { d -> t.contains(d) } }) return true
+        return false
     }
 
     private fun toast(msg: String) {
