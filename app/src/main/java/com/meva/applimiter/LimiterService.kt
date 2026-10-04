@@ -97,6 +97,7 @@ class LimiterService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        instance = this
         if (!receiverRegistered) {
             val f = IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_OFF)
@@ -121,6 +122,9 @@ class LimiterService : AccessibilityService() {
         if (isSensitive(pkg) &&
             (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED || !isLauncher(pkg))
         ) {
+            scheduleGuardScan()
+        } else if (pkg != packageName && event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            // bilinmeyen paketten gelen sistem diyalogları (EMUI "ilişkisini kes / kaldır" pencereleri)
             scheduleGuardScan()
         }
 
@@ -157,6 +161,7 @@ class LimiterService : AccessibilityService() {
     }
 
     override fun onDestroy() {
+        if (instance === this) instance = null
         stopCounting()
         hideOverlay()
         scrStop()
@@ -1248,14 +1253,16 @@ class LimiterService : AccessibilityService() {
 
         for (root in roots) {
             val pkg = root.packageName?.toString() ?: continue
-            if (!isSensitive(pkg)) continue
+            val sens = isSensitive(pkg)
+            if (!sens && (pkg == packageName || pkg in imePackages())) continue
             val texts = ArrayList<String>()
             collectTexts(root, texts, 0)
             if (texts.any { it.contains(LABEL) }) {
                 labelSeenAt = SystemClock.elapsedRealtime()
                 dumpGuard(pkg, texts)
             }
-            if (!isProtectedScreen(pkg, texts)) continue
+            val protectedNow = if (sens) isProtectedScreen(pkg, texts) else isProtectedForeign(texts)
+            if (!protectedNow) continue
 
             lastGuardTrigger = SystemClock.elapsedRealtime()
             performGlobalAction(GLOBAL_ACTION_HOME)
@@ -1266,6 +1273,22 @@ class LimiterService : AccessibilityService() {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             )
             return
+        }
+    }
+
+    private fun imePackages(): Set<String> = try {
+        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+            .enabledInputMethodList.map { it.packageName }.toSet()
+    } catch (_: Exception) {
+        emptySet()
+    }
+
+    // Paketi bilinmeyen / sistem diyaloğu: ad + silme/kaldırma/ilişki kesme ifadesi birlikte olmalı
+    private fun isProtectedForeign(texts: List<String>): Boolean {
+        if (texts.any { it == "etkinleştir" || it == "activate" }) return false
+        if (texts.none { it.contains(LABEL) }) return false
+        return texts.any { t ->
+            DANGER_CONTAINS.any { d -> t.contains(d) } || t.contains("ilişkisini kes") || t.contains("iliskisini kes")
         }
     }
 
@@ -1337,6 +1360,14 @@ class LimiterService : AccessibilityService() {
 
     companion object {
         private const val LABEL = "screen limiter"
+
+        @Volatile
+        private var instance: LimiterService? = null
+
+        /** Cihaz yöneticisi izinsiz kapatılınca açık duran sil/kaldır penceresini kapatmak için. */
+        fun requestHome() {
+            instance?.performGlobalAction(GLOBAL_ACTION_HOME)
+        }
 
         // ekran süresi kilit kartı: ilk gif (lock_gif) bu kadar kalır, sonra gif'ler bu aralıkla değişir
         private const val GIF_FIRST_MS = 7_000L
