@@ -60,6 +60,7 @@ class MainActivity : Activity() {
     private var lockTickRunnable: Runnable? = null
     private var remainingTickRunnable: Runnable? = null
     private var gifRotateRunnable: Runnable? = null
+    private var homeRefreshRunnable: Runnable? = null
     private var lastWaitGif = -1
 
     // "Kalan süre" ekranında dönen GIF'ler (2.gif + yenileri)
@@ -137,6 +138,14 @@ class MainActivity : Activity() {
             addView(exemptBtn)
             addView(btn)
             addView(adminBtn)
+            addView(Button(this@MainActivity).apply {
+                text = "🔒 Kilitle ve çık"
+                setOnClickListener {
+                    lockNow()
+                    unlocked = false
+                    finish()
+                }
+            })
         }
     }
 
@@ -152,8 +161,10 @@ class MainActivity : Activity() {
             showScreenExtraGate()
         } else if (unlocked) {
             showMain()
-        } else {
+        } else if (guardMode) {
             showGate()
+        } else {
+            showHome()
         }
     }
 
@@ -175,6 +186,8 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        homeDialog?.dismiss()
+        homeDialog = null
         GateState.scrGateOpen = false
         super.onDestroy()
     }
@@ -191,7 +204,16 @@ class MainActivity : Activity() {
         remainingTickRunnable = null
         gifRotateRunnable?.let { handler.removeCallbacks(it) }
         gifRotateRunnable = null
-        if (skipRelock) skipRelock = false else unlocked = false
+        homeRefreshRunnable?.let { handler.removeCallbacks(it) }
+        homeRefreshRunnable = null
+        if (skipRelock) {
+            skipRelock = false
+        } else {
+            // Ayarlardan (App) çıkılınca hemen kilitle. Koruma kaynaklı şifre ekranında
+            // (guardMode: silme vb.) işlem için süre tanınır, o yüzden kilitlenmez.
+            if (unlocked && !guardMode && !isPromptMode()) lockNow()
+            unlocked = false
+        }
     }
 
     private fun showMain() {
@@ -215,6 +237,9 @@ class MainActivity : Activity() {
         note: String?,
         iconDrawable: Drawable?,
         extraView: View? = null,
+        requirePassword: Boolean = true,
+        buttonText: String = "Aç",
+        bottomView: View? = null,
         onCorrect: () -> Unit
     ): View {
         val d = resources.displayMetrics.density
@@ -242,7 +267,7 @@ class MainActivity : Activity() {
         }
 
         val button = Button(this).apply {
-            text = "Aç"
+            text = buttonText
             textSize = 16f
             isAllCaps = false
             setTextColor(0xFFFFFFFF.toInt())
@@ -335,6 +360,11 @@ class MainActivity : Activity() {
                     setPadding(dp(12), dp(20), dp(12), 0)
                 })
             }
+            if (bottomView != null) {
+                addView(bottomView, LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(28) })
+            }
         }
 
         val root = FrameLayout(this).apply {
@@ -350,6 +380,20 @@ class MainActivity : Activity() {
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
             }, FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        }
+
+        // Şifresiz mod (ör. "Kilitle"): alan gizli, butona tek tıkla çalışır
+        if (!requirePassword) {
+            input.visibility = View.GONE
+            button.setOnClickListener { onCorrect() }
+            root.addView(
+                StatsUi.button(this) { showQuizStats() },
+                FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                    Gravity.TOP
+                ).apply { setMargins(dp(28), dp(16), dp(28), 0) }
+            )
+            return root
         }
 
         // ---- yanlış deneme sınırı: 3 yanlıştan sonra 5 dakika şifre alanını kilitle ----
@@ -425,7 +469,56 @@ class MainActivity : Activity() {
         return root
     }
 
-    private fun showGate() {
+    // ---- açılış: küçük pop-up. Kilitli değilse [Lock][App], kilitliyse [Unlock][App] ----
+
+    private fun isProtectionOpen() = System.currentTimeMillis() < prefs.getLong("grace_until", 0L)
+
+    private fun lockNow() {
+        prefs.edit().putLong("grace_until", 0L).apply()
+    }
+
+    private var homeDialog: AlertDialog? = null
+
+    private fun showHome() {
+        homeDialog?.dismiss()
+        homeDialog = null
+
+        // pop-up'ın arkasında sade bir arka plan
+        setContentView(FrameLayout(this).apply {
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(0xFFF3F6FA.toInt(), 0xFFFFFFFF.toInt())
+            )
+        })
+
+        val locked = !isProtectionOpen()
+        val builder = AlertDialog.Builder(this)
+            .setTitle("Screen Limiter")
+            .setMessage(if (locked) "Durum: Kilitli 🔒" else "Durum: Kilit açık 🔓")
+            .setPositiveButton("App") { _, _ ->
+                // her durumda şifre sorulur, doğruysa ayarlar açılır
+                showGate()
+            }
+            .setOnCancelListener { finish() }
+
+        if (locked) {
+            builder.setNegativeButton("Unlock") { _, _ ->
+                // şifre sorulur, doğruysa kilit açılır
+                showGate(unlockOnly = true)
+            }
+        } else {
+            builder.setNegativeButton("Lock") { _, _ ->
+                // direkt kilitler
+                lockNow()
+                unlocked = false
+                Toast.makeText(this, "Kilitlendi 🔒", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+        homeDialog = builder.show()
+    }
+
+    private fun showGate(unlockOnly: Boolean = false) {
         val root = buildPasswordScreen(
             headline = "Screen Limiter",
             subtitle = if (guardMode) "Korumalı bir işlem için şifre gerekli"
@@ -435,9 +528,12 @@ class MainActivity : Activity() {
             else null,
             iconDrawable = null
         ) {
-            unlocked = true
+            if (!unlockOnly) unlocked = true
             grantGrace()
-            if (guardMode) {
+            if (unlockOnly) {
+                Toast.makeText(this, "Kilit açıldı 🔓", Toast.LENGTH_SHORT).show()
+                finish()
+            } else if (guardMode) {
                 Toast.makeText(
                     this,
                     "${Config.GRACE_MS / 60_000} dk içinde işlemini yapabilirsin",
