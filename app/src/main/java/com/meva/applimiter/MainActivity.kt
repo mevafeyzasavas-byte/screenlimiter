@@ -2,6 +2,12 @@ package com.meva.applimiter
 
 import android.animation.ObjectAnimator
 import android.app.Activity
+import android.app.Dialog
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.RippleDrawable
+import android.view.Window
 import android.app.AlertDialog
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
@@ -33,7 +39,6 @@ import android.widget.ListView
 import android.widget.Spinner
 import android.widget.ScrollView
 import android.widget.TextView
-import android.widget.Toast
 import java.util.Locale
 
 class MainActivity : Activity() {
@@ -445,13 +450,13 @@ class MainActivity : Activity() {
                 if (fails >= Config.PASSWORD_MAX_ATTEMPTS) {
                     val until = System.currentTimeMillis() + Config.PASSWORD_LOCKOUT_MS
                     prefs.edit().putInt("pwd_fail_count", 0).putLong("pwd_lock_until", until).apply()
-                    Toast.makeText(this, "Çok fazla yanlış deneme, 5 dakika kilitlendi", Toast.LENGTH_LONG).show()
+                    showBanner("Çok fazla yanlış deneme · 5 dk kilitlendi", B_ERR)
                     setLocked(true)
                     tickLock()
                 } else {
                     prefs.edit().putInt("pwd_fail_count", fails).apply()
                     val left = Config.PASSWORD_MAX_ATTEMPTS - fails
-                    Toast.makeText(this, "Yanlış şifre. Kalan deneme: $left", Toast.LENGTH_SHORT).show()
+                    showBanner("Yanlış şifre · Kalan deneme: $left", B_ERR)
                 }
             }
         }
@@ -477,8 +482,115 @@ class MainActivity : Activity() {
         prefs.edit().putLong("grace_until", 0L).apply()
     }
 
-    private var homeDialog: AlertDialog? = null
+    private var homeDialog: Dialog? = null
+    private var currentBanner: View? = null
 
+    private fun dpi(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+    private fun rounded(color: Int, radiusDp: Int, strokeColor: Int? = null): GradientDrawable =
+        GradientDrawable().apply {
+            cornerRadius = dpi(radiusDp).toFloat()
+            setColor(color)
+            if (strokeColor != null) setStroke(dpi(1), strokeColor)
+        }
+
+    private fun ripple(bg: Drawable, color: Int = 0x22000000): Drawable =
+        RippleDrawable(ColorStateList.valueOf(color), bg, null)
+
+    // ---- üstten kayarak inen uyarı bandı (Toast yerine) ----
+    private fun showBanner(msg: String, kind: Int = B_INFO) {
+        val decor = window.decorView as? FrameLayout ?: return
+        currentBanner?.let { decor.removeView(it) }
+        val accent = when (kind) {
+            B_OK -> 0xFF2DD4A7.toInt()
+            B_ERR -> 0xFFF87171.toInt()
+            else -> 0xFF34C9BE.toInt()
+        }
+        val iconRes = when (kind) { B_OK -> R.drawable.ic_check; B_ERR -> R.drawable.ic_alert; else -> R.drawable.ic_lock }
+
+        val chip = FrameLayout(this).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor((accent and 0x00FFFFFF) or 0x33000000)
+            }
+            addView(ImageView(this@MainActivity).apply {
+                setImageResource(iconRes)
+                setColorFilter(accent)
+            }, FrameLayout.LayoutParams(dpi(16), dpi(16), Gravity.CENTER))
+        }
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dpi(12), dpi(11), dpi(20), dpi(11))
+            background = rounded(0xFF111827.toInt(), 20)
+            elevation = dpi(12).toFloat()
+            addView(chip, LinearLayout.LayoutParams(dpi(30), dpi(30)))
+            addView(TextView(this@MainActivity).apply {
+                text = msg
+                textSize = 14f
+                setTextColor(0xFFFFFFFF.toInt())
+                typeface = Typeface.create(typeface, Typeface.BOLD)
+                maxWidth = (resources.displayMetrics.widthPixels * 0.72).toInt()
+            }, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { leftMargin = dpi(12) })
+        }
+        val sbId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        val sbH = if (sbId > 0) resources.getDimensionPixelSize(sbId) else dpi(24)
+        decor.addView(row, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+            Gravity.TOP or Gravity.CENTER_HORIZONTAL
+        ).apply { topMargin = sbH + dpi(10) })
+        row.alpha = 0f
+        row.translationY = -dpi(24).toFloat()
+        row.animate().alpha(1f).translationY(0f).setDuration(240).start()
+        currentBanner = row
+        handler.postDelayed({
+            if (currentBanner === row) {
+                row.animate().alpha(0f).translationY(-dpi(24).toFloat()).setDuration(200)
+                    .withEndAction {
+                        decor.removeView(row)
+                        if (currentBanner === row) currentBanner = null
+                    }.start()
+            }
+        }, 2600)
+    }
+
+    // Bandın görünmesi için kısa bir süre bekleyip kapat
+    private fun delayedFinish(ms: Long = 1000L) {
+        handler.postDelayed({ if (!isFinishing && !isDestroyed) finish() }, ms)
+    }
+
+    private fun actionButton(label: String, iconRes: Int, primary: Boolean, onClick: () -> Unit): View {
+        val teal = 0xFF0F9C93.toInt()
+        val tealLight = 0xFF34C9BE.toInt()
+        val fg = if (primary) 0xFFFFFFFF.toInt() else 0xFF334155.toInt()
+        val bg: Drawable = if (primary)
+            GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(tealLight, teal))
+                .apply { cornerRadius = dpi(16).toFloat() }
+        else rounded(0xFFFFFFFF.toInt(), 16, 0xFFDCE3EC.toInt())
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(dpi(10), dpi(15), dpi(10), dpi(15))
+            background = ripple(bg, if (primary) 0x33FFFFFF else 0x14000000)
+            if (primary) elevation = dpi(3).toFloat()
+            isClickable = true
+            addView(ImageView(this@MainActivity).apply {
+                setImageResource(iconRes)
+                setColorFilter(fg)
+            }, LinearLayout.LayoutParams(dpi(18), dpi(18)).apply { rightMargin = dpi(8) })
+            addView(TextView(this@MainActivity).apply {
+                text = label
+                textSize = 15f
+                setTextColor(fg)
+                typeface = Typeface.create(typeface, Typeface.BOLD)
+            })
+            setOnClickListener { onClick() }
+        }
+    }
+
+    // ---- açılış pop-up'ı: Kilitli değilse [Lock][App], kilitliyse [Unlock][App] ----
     private fun showHome() {
         homeDialog?.dismiss()
         homeDialog = null
@@ -492,30 +604,177 @@ class MainActivity : Activity() {
         })
 
         val locked = !isProtectionOpen()
-        val builder = AlertDialog.Builder(this)
-            .setTitle("Screen Limiter")
-            .setMessage(if (locked) "Durum: Kilitli 🔒" else "Durum: Kilit açık 🔓")
-            .setPositiveButton("App") { _, _ ->
-                // her durumda şifre sorulur, doğruysa ayarlar açılır
+        // kilitli = korumalı (teal), açık = dikkat (amber)
+        val status = if (locked) 0xFF0F9C93.toInt() else 0xFFE8890C.toInt()
+        val statusTint = if (locked) 0xFFE6F6F4.toInt() else 0xFFFFF1DC.toInt()
+
+        val iconView = ImageView(this).apply {
+            setImageResource(if (locked) R.drawable.ic_lock else R.drawable.ic_lock_open)
+            setColorFilter(status)
+        }
+        val badge = FrameLayout(this).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(statusTint)
+            }
+            addView(iconView, FrameLayout.LayoutParams(dpi(34), dpi(34), Gravity.CENTER))
+        }
+        val titleTv = TextView(this).apply {
+            text = "Screen Limiter"
+            textSize = 20f
+            setTextColor(0xFF0F172A.toInt())
+            typeface = Typeface.create(typeface, Typeface.BOLD)
+            gravity = Gravity.CENTER
+        }
+        val dot = View(this).apply {
+            background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(status) }
+        }
+        val pillText = TextView(this).apply {
+            text = if (locked) "Kilitli" else "Kilit açık"
+            textSize = 12.5f
+            setTextColor(status)
+            typeface = Typeface.create(typeface, Typeface.BOLD)
+        }
+        val pill = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dpi(12), dpi(6), dpi(14), dpi(6))
+            background = rounded(statusTint, 20)
+            addView(dot, LinearLayout.LayoutParams(dpi(8), dpi(8)).apply { rightMargin = dpi(8) })
+            addView(pillText)
+        }
+        val subtitleTv = TextView(this).apply {
+            text = if (locked) "Kilidi açmak veya ayarlara girmek için\nşifre gerekir"
+                   else "Hemen kilitleyebilir ya da ayarlara\nşifreyle girebilirsin"
+            textSize = 13.5f
+            setTextColor(0xFF64748B.toInt())
+            gravity = Gravity.CENTER
+            setLineSpacing(dpi(2).toFloat(), 1f)
+        }
+
+        lateinit var dlg: Dialog
+        lateinit var rowRef: View
+
+        // Koruma eksikse (servis ya da silme koruması kapalı) pop-up'ta uyar
+        val problems = mutableListOf<String>()
+        if (!isServiceEnabled()) problems += "Erişilebilirlik servisi kapalı"
+        if (!isAdminActive()) problems += "Silme koruması kapalı"
+        val warn: View? = if (problems.isEmpty()) null else LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dpi(14), dpi(12), dpi(14), dpi(12))
+            background = ripple(rounded(0xFFFEECEC.toInt(), 14, 0xFFF9C9C9.toInt()), 0x14000000)
+            isClickable = true
+            addView(ImageView(this@MainActivity).apply {
+                setImageResource(R.drawable.ic_alert)
+                setColorFilter(0xFFDC2626.toInt())
+            }, LinearLayout.LayoutParams(dpi(20), dpi(20)).apply { rightMargin = dpi(12) })
+            addView(LinearLayout(this@MainActivity).apply {
+                orientation = LinearLayout.VERTICAL
+                addView(TextView(this@MainActivity).apply {
+                    text = "Koruma eksik"
+                    textSize = 13.5f
+                    setTextColor(0xFF991B1B.toInt())
+                    typeface = Typeface.create(typeface, Typeface.BOLD)
+                })
+                addView(TextView(this@MainActivity).apply {
+                    text = problems.joinToString(" · ") + "\nDüzeltmek için dokun"
+                    textSize = 12f
+                    setTextColor(0xFFB91C1C.toInt())
+                })
+            })
+            setOnClickListener {
+                dlg.dismiss(); homeDialog = null
                 showGate()
             }
-            .setOnCancelListener { finish() }
-
-        if (locked) {
-            builder.setNegativeButton("Unlock") { _, _ ->
-                // şifre sorulur, doğruysa kilit açılır
+        }
+        val primaryBtn = if (locked)
+            actionButton("Unlock", R.drawable.ic_lock_open, true) {
+                dlg.dismiss(); homeDialog = null
                 showGate(unlockOnly = true)
             }
-        } else {
-            builder.setNegativeButton("Lock") { _, _ ->
-                // direkt kilitler
+        else
+            actionButton("Lock", R.drawable.ic_lock, true) {
                 lockNow()
                 unlocked = false
-                Toast.makeText(this, "Kilitlendi 🔒", Toast.LENGTH_SHORT).show()
-                finish()
+                // başarı durumu: kart güncellenir, kısa süre sonra kapanır
+                val ok = 0xFF0F9C93.toInt()
+                iconView.setImageResource(R.drawable.ic_check)
+                iconView.setColorFilter(ok)
+                badge.background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(0xFFE6F6F4.toInt()) }
+                titleTv.text = "Kilitlendi"
+                pillText.text = "Kilitli"
+                pillText.setTextColor(ok)
+                (dot.background as GradientDrawable).setColor(ok)
+                pill.background = rounded(0xFFE6F6F4.toInt(), 20)
+                subtitleTv.text = "Koruma aktif"
+                rowRef.visibility = View.GONE
+                handler.postDelayed({
+                    if (dlg.isShowing) dlg.dismiss()
+                    homeDialog = null
+                    finish()
+                }, 900)
+            }
+        val appBtn = actionButton("App", R.drawable.ic_apps, false) {
+            dlg.dismiss(); homeDialog = null
+            showGate()
+        }
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            addView(primaryBtn, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                .apply { rightMargin = dpi(6) })
+            addView(appBtn, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                .apply { leftMargin = dpi(6) })
+        }
+        rowRef = row
+
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(dpi(22), dpi(28), dpi(22), dpi(22))
+            background = rounded(0xFFFFFFFF.toInt(), 28)
+            elevation = dpi(14).toFloat()
+            addView(badge, LinearLayout.LayoutParams(dpi(76), dpi(76)))
+            addView(titleTv, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dpi(16) })
+            addView(pill, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dpi(10) })
+            addView(subtitleTv, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dpi(14); bottomMargin = dpi(if (warn != null) 16 else 24) })
+            if (warn != null) addView(warn, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = dpi(20) })
+            addView(row, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        }
+        // kartın gölgesi pencere sınırında kesilmesin diye kenar boşluğu
+        val wrapper = FrameLayout(this).apply {
+            setPadding(dpi(14), dpi(14), dpi(14), dpi(18))
+            addView(card, FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        }
+
+        dlg = Dialog(this).apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(wrapper)
+            setCanceledOnTouchOutside(true)
+            setOnCancelListener { finish() }
+            window?.apply {
+                setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                setDimAmount(0.55f)
+                setLayout((resources.displayMetrics.widthPixels * 0.92).toInt(),
+                    ViewGroup.LayoutParams.WRAP_CONTENT)
             }
         }
-        homeDialog = builder.show()
+        card.alpha = 0f
+        card.scaleX = 0.92f
+        card.scaleY = 0.92f
+        homeDialog = dlg
+        dlg.show()
+        card.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(220).start()
     }
 
     private fun showGate(unlockOnly: Boolean = false) {
@@ -531,15 +790,11 @@ class MainActivity : Activity() {
             if (!unlockOnly) unlocked = true
             grantGrace()
             if (unlockOnly) {
-                Toast.makeText(this, "Kilit açıldı 🔓", Toast.LENGTH_SHORT).show()
-                finish()
+                showBanner("Kilit açıldı", B_OK)
+                delayedFinish()
             } else if (guardMode) {
-                Toast.makeText(
-                    this,
-                    "${Config.GRACE_MS / 60_000} dk içinde işlemini yapabilirsin",
-                    Toast.LENGTH_LONG
-                ).show()
-                finish()
+                showBanner("${Config.GRACE_MS / 60_000} dk içinde işlemini yapabilirsin", B_OK)
+                delayedFinish(1200)
             } else {
                 showMain()
             }
@@ -730,15 +985,15 @@ class MainActivity : Activity() {
             extraView = extra
         ) {
             if (prefs.getBoolean("scr_extra_used", false)) {
-                Toast.makeText(this, "Bu kilit döngüsünde ek süre zaten kullanıldı", Toast.LENGTH_LONG).show()
+                showBanner("Bu kilit döngüsünde ek süre zaten kullanıldı", B_ERR)
             } else {
                 prefs.edit()
                     .putBoolean("scr_extra_used", true)
                     .putLong("scr_extra_until", System.currentTimeMillis() + Config.EXTRA_MS)
                     .apply()
-                Toast.makeText(this, "${Config.EXTRA_MS / 60_000} dk ek süre verildi", Toast.LENGTH_LONG).show()
+                showBanner("${Config.EXTRA_MS / 60_000} dk ek süre verildi", B_OK)
             }
-            finish()
+            delayedFinish(1000)
         }
         setContentView(root)
     }
@@ -1112,3 +1367,8 @@ class MainActivity : Activity() {
         }
     }
 }
+
+// uyarı bandı türleri
+private const val B_INFO = 0
+private const val B_OK = 1
+private const val B_ERR = 2
