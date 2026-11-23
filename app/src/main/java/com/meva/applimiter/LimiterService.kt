@@ -139,7 +139,8 @@ class LimiterService : AccessibilityService() {
             if (scrEnabled()) enforceScreenLock()
         }
 
-        if (pkg == packageName && (overlayView != null || scrLockView != null)) return   // kendi kartımızı yok say
+        if (pkg == packageName && (overlayView != null || scrLockView != null ||
+                (badgeView != null && event.className?.toString() != MainActivity::class.java.name))) return   // kendi kartımızı yok say
         if (pkg in ignoredPackages()) return
         onForeground(pkg)
     }
@@ -182,9 +183,10 @@ class LimiterService : AccessibilityService() {
             stopCounting()          // eski uygulamanın süresini kaydet (ve sınırsızsa yeniden kilitle)
             currentPkg = pkg
         }
-        if (pkg !in selected()) return
+        if (pkg !in selected()) { hideBadge(); return }
 
         if (isUnlimited(pkg)) {
+            hideBadge()
             if (!UnlockState.isUnlocked(pkg)) {
                 requestPassword(pkg)
             }
@@ -209,7 +211,8 @@ class LimiterService : AccessibilityService() {
     // Kilitli bir uygulama tekrar açılmaya çalışıldığında şifre ekranını göster.
     // Doğru şifreyle bu kilit döngüsü için tek seferlik 15 dakikalık ek süre verilir.
     private fun requestExtraUnlock(pkg: String) {
-        if (!isReallyForeground(pkg)) return
+        if (!isReallyForeground(pkg)) { retryPromptLater(pkg); return }
+        promptRetries = 0
         if (SystemClock.elapsedRealtime() - lastUnlockPrompt < 1500) return
         lastUnlockPrompt = SystemClock.elapsedRealtime()
         startActivity(
@@ -226,6 +229,18 @@ class LimiterService : AccessibilityService() {
     private fun isReallyForeground(pkg: String): Boolean {
         val active = try { rootInActiveWindow?.packageName?.toString() } catch (e: Exception) { null }
         return active == null || active == pkg
+    }
+
+    // Uygulama geçişi sırasında rootInActiveWindow eski pencereyi (launcher vb.) döndürebilir;
+    // eskiden bu durumda kilitli uygulama hiç engellenmeden açık kalıyordu. Kısa süre yeniden dene.
+    private var promptRetries = 0
+    private fun retryPromptLater(pkg: String) {
+        if (promptRetries >= 5) { promptRetries = 0; return }
+        promptRetries++
+        handler.postDelayed({
+            val active = try { rootInActiveWindow?.packageName?.toString() } catch (e: Exception) { null }
+            if (active == pkg) onForeground(pkg) else retryPromptLater(pkg)
+        }, 400)
     }
 
     // Şifre ekranı bir sebeple açılamadıysa (arka plandan başlatma engeli vb.) kilitli
@@ -245,7 +260,8 @@ class LimiterService : AccessibilityService() {
     // gelmeden eve gönderiyordu (A kapanıyor ama şifre ekranı hiç görünmüyordu).
     // MainActivity'yi NEW_TASK ile başlatmak zaten A'nın önüne geçip onu ekrandan kaldırır.
     private fun requestPassword(pkg: String) {
-        if (!isReallyForeground(pkg)) return
+        if (!isReallyForeground(pkg)) { retryPromptLater(pkg); return }
+        promptRetries = 0
         if (SystemClock.elapsedRealtime() - lastUnlockPrompt < 1500) return
         lastUnlockPrompt = SystemClock.elapsedRealtime()
         startActivity(
@@ -269,6 +285,7 @@ class LimiterService : AccessibilityService() {
         val r = Runnable { lock(pkg) }
         limitRunnable = r
         handler.postDelayed(r, remaining)
+        showBadge()
     }
 
     // Şifreyle açılan kilitli uygulama için tek seferlik 15 dk'lık ek süre sayacı.
@@ -285,9 +302,11 @@ class LimiterService : AccessibilityService() {
         val r = Runnable { lock(pkg) }
         limitRunnable = r
         handler.postDelayed(r, remaining)
+        showBadge()
     }
 
     private fun stopCounting() {
+        hideBadge()
         limitRunnable?.let { handler.removeCallbacks(it) }
         limitRunnable = null
         val pkg = currentPkg
@@ -308,6 +327,7 @@ class LimiterService : AccessibilityService() {
     }
 
     private fun lock(pkg: String) {
+        hideBadge()
         limitRunnable = null
         enteredAt = 0L
         countingExtra = false
@@ -321,6 +341,7 @@ class LimiterService : AccessibilityService() {
             .apply()
         showOverlay(pkg, "Süre doldu", "Kilidin açılmasına kalan süre", lockUntil)
         performGlobalAction(GLOBAL_ACTION_HOME)
+        ensureLeft(pkg)   // HOME yutulduysa uygulama ekranda kalmasın
     }
 
     // ---- ekran süresi limiti ----
@@ -1119,6 +1140,89 @@ class LimiterService : AccessibilityService() {
             }
         }
         scrLockView = null
+    }
+
+    // ---- kalıcı kalan süre rozeti ----
+    // Seçili (süreli) bir uygulama ekrandayken sağ üstte küçük, dokunmaya kapalı bir rozet:
+    // "Kalan 12:34" (son 1 dk kırmızı) veya "Ek süre 08:10". Böylece kilit durumu hep görünür.
+    private var badgeView: TextView? = null
+    private var badgeTick: Runnable? = null
+
+    private fun badgeRemaining(): Long {
+        val pkg = currentPkg ?: return 0L
+        val elapsed = if (enteredAt != 0L) SystemClock.elapsedRealtime() - enteredAt else 0L
+        return if (countingExtra) {
+            Config.EXTRA_MS - prefs.getLong("extra_used_$pkg", 0L) - elapsed
+        } else {
+            prefs.getLong("runlimit_$pkg", Config.RUN_LIMIT_MS) - prefs.getLong("used_$pkg", 0L) - elapsed
+        }
+    }
+
+    private fun updateBadge() {
+        val tv = badgeView ?: return
+        val left = badgeRemaining()
+        tv.text = (if (countingExtra) "⏱ Ek süre " else "⏱ Kalan ") + clock(left)
+        (tv.background as? GradientDrawable)?.setColor(
+            if (left < 60_000L) 0xDDDC5B5B.toInt() else 0xCC0F9C93.toInt()
+        )
+    }
+
+    private fun showBadge() {
+        if (badgeView == null) {
+            val d = resources.displayMetrics.density
+            val tv = TextView(this).apply {
+                textSize = 13f
+                setTextColor(0xFFFFFFFF.toInt())
+                setTypeface(typeface, Typeface.BOLD)
+                setPadding((10 * d).toInt(), (5 * d).toInt(), (10 * d).toInt(), (5 * d).toInt())
+                background = GradientDrawable().apply {
+                    cornerRadius = 16 * d
+                    setColor(0xCC0F9C93.toInt())
+                }
+            }
+            val lp = WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                PixelFormat.TRANSLUCENT
+            ).apply {
+                gravity = Gravity.TOP or Gravity.END
+                x = (8 * d).toInt()
+                y = (28 * d).toInt()
+            }
+            try {
+                (getSystemService(Context.WINDOW_SERVICE) as WindowManager).addView(tv, lp)
+            } catch (e: Exception) {
+                return
+            }
+            badgeView = tv
+        }
+        updateBadge()
+        if (badgeTick == null) {
+            val t = object : Runnable {
+                override fun run() {
+                    updateBadge()
+                    handler.postDelayed(this, 1000)
+                }
+            }
+            badgeTick = t
+            handler.postDelayed(t, 1000)
+        }
+    }
+
+    private fun hideBadge() {
+        badgeTick?.let { handler.removeCallbacks(it) }
+        badgeTick = null
+        badgeView?.let {
+            try {
+                (getSystemService(Context.WINDOW_SERVICE) as WindowManager).removeView(it)
+            } catch (e: Exception) {
+            }
+        }
+        badgeView = null
     }
 
     // ---- kalan süre kartı ----

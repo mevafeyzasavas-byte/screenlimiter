@@ -50,9 +50,14 @@ class MainActivity : Activity() {
     private lateinit var header: TextView
     private lateinit var status: TextView
     private lateinit var mainView: View
-    private lateinit var adminBtn: Button
-    private lateinit var screenBtn: Button
-    private lateinit var exemptBtn: Button
+    private lateinit var svcVal: TextView
+    private lateinit var adminVal: TextView
+    private lateinit var screenVal: TextView
+    private lateinit var exemptVal: TextView
+    private lateinit var sumIcon: ImageView
+    private lateinit var sumCircle: FrameLayout
+    private lateinit var sumTitle: TextView
+    private lateinit var sumSub: TextView
     private var guardMode = false     // koruma ekranından (silme/ayar) açıldı mı
     private var unlockPkg: String? = null   // "sınırsız" bir uygulamayı açmak için şifre isteniyor mu
     private var extraPkg: String? = null    // kilitli bir uygulamaya 15 dk'lık ek süre için şifre isteniyor mu
@@ -92,28 +97,53 @@ class MainActivity : Activity() {
         prefs = getSharedPreferences("limiter", Context.MODE_PRIVATE)
         selected.addAll(prefs.getStringSet("selected", emptySet()) ?: emptySet())
 
-        header = TextView(this).apply {
-            textSize = 18f
-            setPadding(32, 32, 32, 8)
-        }
+        header = TextView(this)   // eski yapıyla uyumluluk için (ekranda gösterilmez)
         updateHeader()
+        status = TextView(this)
 
-        status = TextView(this).apply {
-            textSize = 15f
-            setPadding(32, 0, 32, 8)
+        val ink = 0xFF0F172A.toInt()
+        val muted = 0xFF64748B.toInt()
+
+        fun valueTv() = TextView(this).apply {
+            textSize = 13.5f
+            setTextColor(muted)
+            gravity = Gravity.END
+            typeface = Typeface.create(typeface, Typeface.BOLD)
+        }
+        svcVal = valueTv(); adminVal = valueTv(); screenVal = valueTv(); exemptVal = valueTv()
+
+        // ---- özet kartı: koruma durumu tek bakışta ----
+        sumIcon = ImageView(this)
+        sumCircle = FrameLayout(this).apply {
+            addView(sumIcon, FrameLayout.LayoutParams(dpi(26), dpi(26), Gravity.CENTER))
+        }
+        sumTitle = TextView(this).apply {
+            textSize = 18f
+            setTextColor(ink)
+            typeface = Typeface.create(typeface, Typeface.BOLD)
+        }
+        sumSub = TextView(this).apply { textSize = 13.5f; setTextColor(muted) }
+        val summary = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dpi(18), dpi(18), dpi(18), dpi(18))
+            background = rounded(0xFFFFFFFF.toInt(), 22, 0xFFEDF1F6.toInt())
+            elevation = dpi(2).toFloat()
+            addView(sumCircle, LinearLayout.LayoutParams(dpi(52), dpi(52)).apply { rightMargin = dpi(14) })
+            addView(LinearLayout(this@MainActivity).apply {
+                orientation = LinearLayout.VERTICAL
+                addView(sumTitle)
+                addView(sumSub)
+            }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         }
 
-        val btn = Button(this).apply {
-            text = "Erişilebilirlik ayarlarını aç"
-            setOnClickListener {
-                grantGrace()
-                skipRelock = true
-                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-            }
+        val svcRow = settingRow("Erişilebilirlik servisi", svcVal, true) {
+            grantGrace()
+            skipRelock = true
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
-
-        adminBtn = Button(this).apply {
-            setOnClickListener {
+        val adminRow = settingRow("Silme koruması", adminVal, false) {
+            if (!isAdminActive()) {
                 grantGrace()
                 skipRelock = true
                 val i = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
@@ -128,31 +158,100 @@ class MainActivity : Activity() {
                 startActivity(i)
             }
         }
+        val screenRow = settingRow("Ekran süresi limiti", screenVal, true) { showScreenLimitDialog() }
+        val exemptRow = settingRow("Limit dışı uygulamalar", exemptVal, false) { showExemptDialog() }
+        val statsRow = settingRow("Soru istatistikleri", TextView(this), false) { showQuizStats() }
 
-        screenBtn = Button(this).apply { setOnClickListener { showScreenLimitDialog() } }
-        exemptBtn = Button(this).apply { setOnClickListener { showExemptDialog() } }
+        val lockBtn = actionButton("Kilitle ve çık", R.drawable.ic_lock, true) {
+            lockNow()
+            unlocked = false
+            finish()
+        }
 
-        mainView = LinearLayout(this).apply {
+        val column = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            addView(StatsUi.button(this@MainActivity) { showQuizStats() }, LinearLayout.LayoutParams(
+            setPadding(dpi(16), dpi(28), dpi(16), dpi(28))
+            addView(TextView(this@MainActivity).apply {
+                text = "Ayarlar"
+                textSize = 28f
+                setTextColor(ink)
+                typeface = Typeface.create(typeface, Typeface.BOLD)
+                setPadding(dpi(4), 0, 0, dpi(14))
+            })
+            addView(summary)
+            addView(sectionLabel("Koruma"))
+            addView(settingCard(svcRow, adminRow))
+            addView(sectionLabel("Ekran süresi"))
+            addView(settingCard(screenRow, exemptRow))
+            addView(sectionLabel("İlerleme"))
+            addView(settingCard(statsRow))
+            addView(lockBtn, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply { setMargins(32, 24, 32, 0) })
-            addView(header)
-            addView(status)
-            addView(screenBtn)
-            addView(exemptBtn)
-            addView(btn)
-            addView(adminBtn)
-            addView(Button(this@MainActivity).apply {
-                text = "🔒 Kilitle ve çık"
-                setOnClickListener {
-                    lockNow()
-                    unlocked = false
-                    finish()
-                }
+            ).apply { topMargin = dpi(28) })
+        }
+
+        // tablette içerik çok yayılmasın: en fazla 560dp genişlikte ortalanır
+        val maxW = minOf(resources.displayMetrics.widthPixels, dpi(560))
+        mainView = ScrollView(this).apply {
+            isFillViewport = true
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(0xFFF3F6FA.toInt(), 0xFFFFFFFF.toInt())
+            )
+            addView(FrameLayout(this@MainActivity).apply {
+                addView(column, FrameLayout.LayoutParams(maxW, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL))
             })
         }
     }
+
+    // ---- ayar ekranı yapı taşları ----
+
+    private fun sectionLabel(text: String) = TextView(this).apply {
+        this.text = text.uppercase(Locale.getDefault())
+        textSize = 11.5f
+        letterSpacing = 0.08f
+        setTextColor(0xFF94A3B8.toInt())
+        typeface = Typeface.create(typeface, Typeface.BOLD)
+        setPadding(dpi(6), dpi(24), 0, dpi(8))
+    }
+
+    private fun settingCard(vararg rows: View) = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        background = rounded(0xFFFFFFFF.toInt(), 20, 0xFFEDF1F6.toInt())
+        elevation = dpi(2).toFloat()
+        rows.forEach { addView(it, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)) }
+    }
+
+    private fun settingRow(title: String, value: TextView, divider: Boolean, onClick: () -> Unit): View =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(LinearLayout(this@MainActivity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dpi(18), dpi(17), dpi(14), dpi(17))
+                background = ripple(ColorDrawable(Color.TRANSPARENT), 0x14000000)
+                isClickable = true
+                addView(TextView(this@MainActivity).apply {
+                    text = title
+                    textSize = 15.5f
+                    setTextColor(0xFF0F172A.toInt())
+                }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+                addView(value, LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+                addView(TextView(this@MainActivity).apply {
+                    text = "›"
+                    textSize = 22f
+                    setTextColor(0xFFA0AEC0.toInt())
+                    setPadding(dpi(10), 0, 0, 0)
+                })
+                setOnClickListener { onClick() }
+            })
+            if (divider) addView(View(this@MainActivity).apply {
+                setBackgroundColor(0xFFEDF1F6.toInt())
+            }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpi(1))
+                .apply { leftMargin = dpi(18) })
+        }
 
     override fun onResume() {
         super.onResume()
@@ -223,10 +322,24 @@ class MainActivity : Activity() {
 
     private fun showMain() {
         setContentView(mainView)
-        status.text = if (isServiceEnabled()) "Servis: AÇIK ✔" else "Servis: KAPALI ✖ (aşağıdan aç)"
-        val active = isAdminActive()
-        adminBtn.text = if (active) "Silme koruması: AÇIK ✔" else "Silme korumasını aç"
-        adminBtn.isEnabled = !active
+        val green = 0xFF0F9C93.toInt()
+        val red = 0xFFDC2626.toInt()
+        val svc = isServiceEnabled()
+        val adm = isAdminActive()
+        svcVal.text = if (svc) "Açık" else "Kapalı"
+        svcVal.setTextColor(if (svc) green else red)
+        adminVal.text = if (adm) "Açık" else "Kapalı"
+        adminVal.setTextColor(if (adm) green else red)
+        val ok = svc && adm
+        val tone = if (ok) green else 0xFFE8890C.toInt()
+        sumCircle.background = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(if (ok) 0xFFE6F6F4.toInt() else 0xFFFFF1DC.toInt())
+        }
+        sumIcon.setImageResource(if (ok) R.drawable.ic_check else R.drawable.ic_alert)
+        sumIcon.setColorFilter(tone)
+        sumTitle.text = if (ok) "Koruma aktif" else "Koruma eksik"
+        sumSub.text = if (ok) "Her şey yolunda" else "Kapalı olanlara dokunup aç"
         updateScreenBtn()
         updateExemptBtn()
     }
@@ -1009,8 +1122,9 @@ class MainActivity : Activity() {
     }
 
     private fun updateScreenBtn() {
-        screenBtn.text = if (prefs.getBoolean("scr_enabled", false))
-            "Ekran süresi limiti: AÇIK ✔ (ayarla)" else "Ekran süresi limitini ayarla"
+        val on = prefs.getBoolean("scr_enabled", false)
+        screenVal.text = if (on) "Açık" else "Kapalı"
+        screenVal.setTextColor(if (on) 0xFF0F9C93.toInt() else 0xFF64748B.toInt())
     }
 
     // ---- ekran süresi limiti kapsamı dışındaki uygulamalar ----
@@ -1020,8 +1134,7 @@ class MainActivity : Activity() {
 
     private fun updateExemptBtn() {
         val n = exemptSet().size
-        exemptBtn.text = if (n == 0) "Kapsam dışı uygulamaları seç"
-        else "Kapsam dışı uygulamalar: $n seçili (düzenle)"
+        exemptVal.text = if (n == 0) "Yok" else "$n uygulama"
     }
 
     // Telefondaki başlatılabilir (launcher'da görünen) uygulamalar, kendimiz hariç
