@@ -315,7 +315,8 @@ class MainActivity : Activity() {
         } else {
             // Ayarlardan (App) çıkılınca hemen kilitle. Koruma kaynaklı şifre ekranında
             // (guardMode: silme vb.) işlem için süre tanınır, o yüzden kilitlenmez.
-            if (unlocked && !guardMode && !isPromptMode()) lockNow()
+            if (unlocked && !guardMode && !isPromptMode() &&
+                !prefs.getBoolean("ui_unlocked", false)) lockNow()
             unlocked = false
         }
     }
@@ -589,10 +590,10 @@ class MainActivity : Activity() {
 
     // ---- açılış: küçük pop-up. Kilitli değilse [Lock][App], kilitliyse [Unlock][App] ----
 
-    private fun isProtectionOpen() = System.currentTimeMillis() < prefs.getLong("grace_until", 0L)
+    private fun isProtectionOpen() = prefs.getBoolean("ui_unlocked", false)
 
     private fun lockNow() {
-        prefs.edit().putLong("grace_until", 0L).apply()
+        prefs.edit().putLong("grace_until", 0L).putBoolean("ui_unlocked", false).apply()
     }
 
     private var homeDialog: Dialog? = null
@@ -901,7 +902,10 @@ class MainActivity : Activity() {
             iconDrawable = null
         ) {
             if (!unlockOnly) unlocked = true
-            grantGrace()
+            // Silme/ayar koruması hep açık: şifre ancak koruma ekranından (guardMode) 3 dk süre verir.
+            // "Unlock" sadece uygulama kilidini açar ve manuel Lock'a kadar kalır.
+            if (guardMode) grantGrace()
+            if (unlockOnly) prefs.edit().putBoolean("ui_unlocked", true).apply()
             if (unlockOnly) {
                 showBanner("Kilit açıldı", B_OK)
                 delayedFinish()
