@@ -349,7 +349,7 @@ class LimiterService : AccessibilityService() {
     // önce dolarsa telefon kilit süresi boyunca tam ekran geri sayım kartıyla kaplanır.
     // Kart altında yalnızca acil arama / SMS / şifre (ek süre) serbesttir.
 
-    private fun scrEnabled() = prefs.getBoolean("scr_enabled", true)
+    private fun scrEnabled() = prefs.getBoolean("scr_enabled", false)
 
     // Kullanıcının "ekran süresi limiti kapsamı dışı" seçtiği uygulamalar
     private fun scrExemptPkgs(): Set<String> =
