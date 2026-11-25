@@ -349,7 +349,7 @@ class LimiterService : AccessibilityService() {
     // önce dolarsa telefon kilit süresi boyunca tam ekran geri sayım kartıyla kaplanır.
     // Kart altında yalnızca acil arama / SMS / şifre (ek süre) serbesttir.
 
-    private fun scrEnabled() = prefs.getBoolean("scr_enabled", false)
+    private fun scrEnabled() = prefs.getBoolean("scr_enabled", true)
 
     // Kullanıcının "ekran süresi limiti kapsamı dışı" seçtiği uygulamalar
     private fun scrExemptPkgs(): Set<String> =
@@ -1327,8 +1327,7 @@ class LimiterService : AccessibilityService() {
     private var lastGuardTrigger = 0L
 
     private fun isSensitive(pkg: String): Boolean =
-        pkg != packageName && pkg !in FILE_APPS &&
-            (pkg == "android" || SENSITIVE_HINTS.any { pkg.contains(it) })
+        pkg != packageName && (pkg == "android" || SENSITIVE_HINTS.any { pkg.contains(it) })
 
     private fun isLauncher(pkg: String): Boolean =
         pkg.contains("launcher") || pkg.contains("miui.home")
@@ -1358,7 +1357,6 @@ class LimiterService : AccessibilityService() {
 
         for (root in roots) {
             val pkg = root.packageName?.toString() ?: continue
-            if (pkg in FILE_APPS) continue   // Dosyalar uygulaması korumalı ekran sayılmasın
             val sens = isSensitive(pkg)
             if (!sens && (pkg == packageName || pkg in imePackages())) continue
             val texts = ArrayList<String>()
@@ -1466,12 +1464,6 @@ class LimiterService : AccessibilityService() {
 
     companion object {
         private const val LABEL = "screen limiter"
-
-        // Dosya yöneticileri: "huawei" paket adı yüzünden hassas sayılıp şifre ekranına atıyordu
-        private val FILE_APPS = setOf(
-            "com.huawei.hidisk", "com.android.documentsui", "com.google.android.documentsui",
-            "com.google.android.apps.nbu.files", "com.sec.android.app.myfiles"
-        )
 
         @Volatile
         private var instance: LimiterService? = null
