@@ -315,8 +315,9 @@ class MainActivity : Activity() {
         } else {
             // Ayarlardan (App) çıkılınca hemen kilitle. Koruma kaynaklı şifre ekranında
             // (guardMode: silme vb.) işlem için süre tanınır, o yüzden kilitlenmez.
-            if (unlocked && !guardMode && !isPromptMode() &&
-                !prefs.getBoolean("ui_unlocked", false)) lockNow()
+            if (unlocked && !guardMode && !isPromptMode()) {
+                prefs.edit().putLong("grace_until", 0L).apply()
+            }
             unlocked = false
         }
     }
@@ -590,10 +591,11 @@ class MainActivity : Activity() {
 
     // ---- açılış: küçük pop-up. Kilitli değilse [Lock][App], kilitliyse [Unlock][App] ----
 
-    private fun isProtectionOpen() = prefs.getBoolean("ui_unlocked", false)
+    // Unlock/Lock = ekran süresi limiti. Limit açık = "Kilitli", limit kapalı = "Kilit açık".
+    private fun isProtectionOpen() = !prefs.getBoolean("scr_enabled", false)
 
     private fun lockNow() {
-        prefs.edit().putLong("grace_until", 0L).putBoolean("ui_unlocked", false).apply()
+        prefs.edit().putLong("grace_until", 0L).putBoolean("scr_enabled", true).apply()
     }
 
     private var homeDialog: Dialog? = null
@@ -744,7 +746,7 @@ class MainActivity : Activity() {
             background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(status) }
         }
         val pillText = TextView(this).apply {
-            text = if (locked) "Kilitli" else "Kilit açık"
+            text = if (locked) "Limit açık" else "Limit kapalı"
             textSize = 12.5f
             setTextColor(status)
             typeface = Typeface.create(typeface, Typeface.BOLD)
@@ -758,8 +760,8 @@ class MainActivity : Activity() {
             addView(pillText)
         }
         val subtitleTv = TextView(this).apply {
-            text = if (locked) "Kilidi açmak veya ayarlara girmek için\nşifre gerekir"
-                   else "Hemen kilitleyebilir ya da ayarlara\nşifreyle girebilirsin"
+            text = if (locked) "Ekran süresi limiti çalışıyor.\nKapatmak (Unlock) için şifre gerekir"
+                   else "Ekran süresi limiti kapalı.\nLock ile tekrar açabilirsin"
             textSize = 13.5f
             setTextColor(0xFF64748B.toInt())
             gravity = Gravity.CENTER
@@ -816,12 +818,12 @@ class MainActivity : Activity() {
                 iconView.setImageResource(R.drawable.ic_check)
                 iconView.setColorFilter(ok)
                 badge.background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(0xFFE6F6F4.toInt()) }
-                titleTv.text = "Kilitlendi"
-                pillText.text = "Kilitli"
+                titleTv.text = "Limit açıldı"
+                pillText.text = "Limit açık"
                 pillText.setTextColor(ok)
                 (dot.background as GradientDrawable).setColor(ok)
                 pill.background = rounded(0xFFE6F6F4.toInt(), 20)
-                subtitleTv.text = "Koruma aktif"
+                subtitleTv.text = "Ekran süresi limiti çalışıyor"
                 rowRef.visibility = View.GONE
                 handler.postDelayed({
                     if (dlg.isShowing) dlg.dismiss()
@@ -905,9 +907,9 @@ class MainActivity : Activity() {
             // Silme/ayar koruması hep açık: şifre ancak koruma ekranından (guardMode) 3 dk süre verir.
             // "Unlock" sadece uygulama kilidini açar ve manuel Lock'a kadar kalır.
             if (guardMode) grantGrace()
-            if (unlockOnly) prefs.edit().putBoolean("ui_unlocked", true).apply()
+            if (unlockOnly) prefs.edit().putBoolean("scr_enabled", false).apply()
             if (unlockOnly) {
-                showBanner("Kilit açıldı", B_OK)
+                showBanner("Ekran süresi limiti kapatıldı", B_OK)
                 delayedFinish()
             } else if (guardMode) {
                 showBanner("${Config.GRACE_MS / 60_000} dk içinde işlemini yapabilirsin", B_OK)
